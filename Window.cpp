@@ -11,16 +11,35 @@
 
 rt::Window::Window(int _width, int _height)
 {
-    if(_height > 0 && _height <= 768 &&
-       _width > 0 && _width <= 1366)
-    {
-        height = _height;
-        width = _width;
-    } else {
-        height = 100;
-        width = 100;
-    }
-    vbuf.assign(height * width, Color{0, 0, 0});
+    // устанавливаем соединение с X сервером
+    display = XOpenDisplay(NULL);
+
+    // получаем дескриптор экрана
+    screen = XDefaultScreen(display);
+
+    // создаем окно указанной ширины и высоты
+    create_window(_width, _height);
+
+    // память для XImage
+    char *data = new char[width * height * 4];
+
+    // создаем графический контекст
+    gc = XDefaultGC(display, screen);
+
+    // параметры изображения
+    Visual *visual = XDefaultVisual(display, screen);
+
+    // устанавливаем глубину цвета = 24
+    int depth = 24;
+    visual->bits_per_rgb = depth;
+
+    // создаем изображение
+    image = XCreateImage(display, visual, depth,
+                         ZPixmap, 0, data,
+                         width, height, 8, 0);
+
+    // необходимо для корректной работы Xlib с изображением
+    XInitImage(image);
 }
 
 void rt::Window::set_pixel_at(int x, int y, Color c)
@@ -28,7 +47,9 @@ void rt::Window::set_pixel_at(int x, int y, Color c)
     if(x >= 0 && x < width &&
        y >= 0 && y < height)
     {
-        vbuf[x + y * width] = c;
+        image->data[4 * x + 4 * width * y] = c.red();
+        image->data[4 * x + 4 * width * y + 1] = c.green();
+        image->data[4 * x + 4 * width * y + 2] = c.blue();
     }
 }
 
@@ -44,41 +65,6 @@ int rt::Window::get_width()
 
 void rt::Window::show(int x, int y)
 {
-    // устанавливаем соединение с X сервером
-    Display *display = XOpenDisplay(NULL);
-
-    // получаем дескриптор экрана
-    int screen_number = XDefaultScreen(display);
-
-    // создаем окно, в котором будет отображена пиксельная карта
-    ::Window window = XCreateSimpleWindow(display, XRootWindow(display, screen_number),
-                                          x, y, width, height, 0,
-                                          XBlackPixel(display, screen_number),
-                                          XWhitePixel(display, screen_number));
-
-    // глубина цвета, установленная в системе
-    int depth = XDefaultDepth(display, screen_number);
-
-    // создаем пиксельную карту
-    Pixmap pixmap = XCreatePixmap(display, window, width, height, depth);
-
-    // выделяем на сервере графический контекст
-    XGCValues gcv;
-    gcv.foreground = 0xFFFFFF;
-    GC gc = XCreateGC(display, window, GCForeground, &gcv);
-
-    // отрисовываем содержание vbuf на пиксельную карту
-    for(int y = 0; y < height; ++y) {
-        for(int x = 0; x < width; ++x) {
-            gcv.foreground = convert_color(vbuf[x + width*y]);
-            XChangeGC(display, gc, GCForeground, &gcv);
-            XDrawPoint(display, pixmap, gc, x, y);
-        }
-    }
-
-    // выбираем события, которые будет обрабатывать окно
-    XSelectInput(display, window, ExposureMask | KeyPressMask);
-
     // выводим окно
     XMapWindow(display, window);
 
@@ -87,29 +73,59 @@ void rt::Window::show(int x, int y)
 
     // обрабатываем события окна
     while(true) {
+        // получаем следующее событие
         XNextEvent(display, &event);
+
         switch(event.type) {
-            case Expose: // перерисовать
+            case Expose: // перерисовываем
                 if(event.xexpose.count != 0) {
                     continue;
                 }
-                XCopyArea(display, pixmap, window, gc,
-                          0, 0, height, width, 0, 0);
+                XPutImage(display, window, gc, image,
+                          0, 0, 0, 0, width, height);
                 break;
 
-            case KeyPress: // завершаем работу по нажатию клавиши
-                // освобождаем ресурсы
-                XFreeGC(display, gc);
-                XFreePixmap(display, pixmap);
-
-                // закрываем соединение
-                XCloseDisplay(display);
-
+            case KeyPress: // скрываем окно по нажатию клавиши
+                XUnmapWindow(display, window);
                 return;
         }
     }
 }
 
-unsigned long rt::Window::convert_color(Color &c) {
-    return (unsigned long)c.blue + ((unsigned long)c.green << 8ul) + ((unsigned long)c.red << 16ul);
+void rt::Window::create_window(int _width, int _height)
+{
+    // максимально допустимые размеры изображения
+    int max_width = XDisplayWidth(display, screen);
+    int max_height = XDisplayHeight(display, screen);
+
+    if(_height > 0 && _height <= max_height &&
+       _width > 0 && _width <= max_width)
+    {
+        height = _height;
+        width = _width;
+    } else {
+        height = 100;
+        width = 100;
+    }
+
+    // создаем окно
+    window = XCreateSimpleWindow(display, XRootWindow(display, screen),
+                                 0, 0, width, height, 1,
+                                 XBlackPixel(display, screen),
+                                 XWhitePixel(display, screen));
+
+    // выбираем события, которые будет обрабатывать окно
+    XSelectInput(display, window, ExposureMask | KeyPressMask);
+}
+
+rt::Window::~Window()
+{
+    // удаляем окно
+    XDestroyWindow(display, window);
+
+    // удаляем изображение
+    image->f.destroy_image(image);
+
+    // закрываем соединение с X сервером
+    XCloseDisplay(display);
 }

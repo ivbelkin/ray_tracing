@@ -8,11 +8,12 @@
 #include "Additional.h"
 
 #include <vector>
+#include <X11/Xlib.h>
 
 namespace rt {
 
 // Окно, в котором будет отрисована рендером сцена
-// обертка над XLib
+// обертка над Xlib
 class Window {
 public:
     // экран заданной ширины и высоты
@@ -30,17 +31,28 @@ public:
     // отобразить на мониторе в указанной позиции
     void show(int x = 0, int y = 0);
 
+    ~Window();
+
 private:
-    // ширина
-    int width;
+    int width; // ширина
 
-    // высота
-    int height;
+    int height; // высота
 
-    // видеобуфер
-    std::vector<Color> vbuf;
+    // далее расположено то, что необходимо
+    // для работы с Xlib
 
-    unsigned long convert_color(Color & c);
+    Display *display; // используемы дисплей
+
+    int screen; // дескриптор экран
+
+    GC gc; // графический контекст
+
+    ::Window window; // окно
+
+    XImage *image; // клиентское представление изображения
+
+    // создать окно Window
+    void create_window(int _width, int _height);
 };
 
 }
