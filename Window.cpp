@@ -6,7 +6,6 @@
 #include "Window.h"
 
 #include <iostream>
-
 #include <X11/Xlib.h>
 
 rt::Window::Window(int _width, int _height)
@@ -47,9 +46,9 @@ void rt::Window::set_pixel_at(int x, int y, Color c)
     if(x >= 0 && x < width &&
        y >= 0 && y < height)
     {
-        image->data[4 * x + 4 * width * y] = c.red();
+        image->data[4 * x + 4 * width * y + 2] = c.red();
         image->data[4 * x + 4 * width * y + 1] = c.green();
-        image->data[4 * x + 4 * width * y + 2] = c.blue();
+        image->data[4 * x + 4 * width * y] = c.blue();
     }
 }
 
