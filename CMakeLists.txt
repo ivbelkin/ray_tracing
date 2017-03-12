@@ -1,0 +1,27 @@
+# Проверяем версию cmake
+cmake_minimum_required(VERSION 3.5)
+
+# Имя проекта
+project(ray_tracing)
+
+# Флаги компиляции
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+
+# Исходные фаилы
+set(SOURCE_EXE main.cpp Window.cpp Render.cpp Scene.cpp Triangle.cpp)
+
+# Дополнительные директории с заголовочными файлами
+include_directories(../Geometry)
+
+# Добавляем директорию с библиотекой вычислительной геометрии
+link_directories(../Geometry/build)
+
+# Библиотека работы с X Window System
+find_package(X11 REQUIRED)
+include_directories(${X11_INCLUDE_DIR})
+
+# Исполняемый фаил
+add_executable(ray_tracing ${SOURCE_EXE})
+
+# Линкуем с библиотеками
+target_link_libraries(ray_tracing Geometry ${X11_LIBRARIES})
