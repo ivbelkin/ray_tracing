@@ -54,15 +54,27 @@ Point3D Render::to_point(int x, int y)
 
 Color Render::get_color_at(int x, int y)
 {
-    Point3D nearest{1e50, 1e50, 1e50};
     Color c;
-
+    // перебираем объекты сцены
     for(Shape * obj: scene->shapes) {
+        // точка пересечения луча и объекта
         Point3D intersection;
+
+        // расстояние до ближайшей точки пересечения
+        ld cur_min_len2 = 1e50;
+
+        // луч, исходящий из точки наблюдения и проходящий
+        // через текущюю точку экрана
         Line3D ray{viewpoint, to_point(x, y)};
+        ld ray_len2 = (ray.B - ray.A).len2();
+
+        // есть ли пересечение объекта с лучом?
         if(obj->ray_intersection(ray, &intersection)) {
-            if((viewpoint - intersection).len2() < (viewpoint - nearest).len2()) {
-                nearest = intersection;
+            // выбираем самое близкое пересечение, находящееся
+            // за экраном
+            ld len2 = (viewpoint - intersection).len2();
+            if(len2 > ray_len2 && len2 < cur_min_len2) {
+                cur_min_len2 = len2;
                 c = obj->get_color(intersection);
             }
         }

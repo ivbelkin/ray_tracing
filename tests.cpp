@@ -7,6 +7,7 @@
 #include "Render.h"
 #include "Additional.h"
 #include "Triangle.h"
+#include "Sphere.h"
 #include "Scene.h"
 #include "Window.h"
 
@@ -116,6 +117,26 @@ void test4()
     sc.add_shape(&t2);
 
     rt::Window win(300, 300);
+
+    Render render;
+    render.set_window(&win, {-5, 5, 4}, {-5, -5, 4}, {5, 5, 4});
+    render.set_scene(&sc);
+    render.set_viewpoint({0, 0, 10});
+
+    render.draw();
+
+    win.show();
+}
+
+void test5()
+{
+    Sphere s1({0, 0, 0}, 5, Color(255, 0, 0));
+
+    Scene sc;
+
+    sc.add_shape(&s1);
+
+    rt::Window win(750, 750);
 
     Render render;
     render.set_window(&win, {-5, 5, 4}, {-5, -5, 4}, {5, 5, 4});

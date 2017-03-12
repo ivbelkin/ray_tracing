@@ -20,4 +20,7 @@ void test3();
 // один за точкой наблюдения
 void test4();
 
+// сфера
+void test5();
+
 #endif //RAY_TRACING_TESTS_H
