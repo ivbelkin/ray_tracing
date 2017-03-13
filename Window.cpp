@@ -64,6 +64,9 @@ int rt::Window::get_width()
 
 void rt::Window::show(int x, int y)
 {
+    // выбираем события, которые будет обрабатывать окно
+    XSelectInput(display, window, ExposureMask | KeyPressMask);
+
     // выводим окно
     XMapWindow(display, window);
 
@@ -112,9 +115,6 @@ void rt::Window::create_window(int _width, int _height)
                                  0, 0, width, height, 1,
                                  XBlackPixel(display, screen),
                                  XWhitePixel(display, screen));
-
-    // выбираем события, которые будет обрабатывать окно
-    XSelectInput(display, window, ExposureMask | KeyPressMask);
 }
 
 rt::Window::~Window()

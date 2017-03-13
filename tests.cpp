@@ -130,13 +130,17 @@ void test4()
 
 void test5()
 {
-    Sphere s1({0, 0, 0}, 5, Color(255, 0, 0));
+    Sphere s1({0, 0, 1.4}, 3, Color(255, 0, 0));
+    Triangle t1({3, 2, 3.5}, {3, -2, 3.5}, {-4, 0, 3.5}, Color(0, 255, 0));
+    Triangle t2({-4, 2, 0}, {-4, -2, 0}, {5, 0, 0}, Color(0, 0, 255));
 
     Scene sc;
 
     sc.add_shape(&s1);
+    sc.add_shape(&t1);
+    sc.add_shape(&t2);
 
-    rt::Window win(750, 750);
+    rt::Window win(300, 300);
 
     Render render;
     render.set_window(&win, {-5, 5, 4}, {-5, -5, 4}, {5, 5, 4});

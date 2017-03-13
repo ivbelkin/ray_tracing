@@ -10,7 +10,7 @@
 
 class Shape {
 public:
-    // Пересечение объекта с прямой
+    // Первое пересечение объекта с лучом
     virtual bool ray_intersection(Line3D & line, Point3D* point) const = 0;
 
     // Цвет объекта в указанной точке

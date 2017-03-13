@@ -21,24 +21,33 @@ bool Sphere::ray_intersection(Line3D &line, Point3D *point) const
     // напрявляющий вектор прямой
     Point3D v = line.B - line.A;
 
-    // лежит ли сфера в полупространстве луча
-    if((v^(center - line.A + v * (radius / v.len()))) <= 0) {
+    // коэффициенты квадратного уравнения
+    ld a = v.len2();
+    ld b = -2.0 * ((center - line.A)^v);
+    ld c = ((center - line.A)^(center - line.A)) - radius * radius;
+
+    // его дискриминант
+    ld D = b * b - 4 * a * c;
+
+    if(D < 0) {
+        // нет пересечений
         return false;
     } else {
-        // коэффициенты квадратного уравнения
-        ld a = v.len2();
-        ld b = -2.0 * ((center - line.A)^v);
-        ld c = ((center - line.A)^(center - line.A)) - radius * radius;
+        // пересечения с прямой есть, выберем из них первое.
+        // корни уравнения
+        ld alpha1 = (-b - sqrtl(D)) / (2 * a);
+        ld alpha2 = (-b + sqrtl(D)) / (2 * a);
 
-        // его дискриминант
-        ld D = b * b - 4 * a * c;
-
-        if(D < 0) {
-            return false;
+        // выберем из них корень соответствующий ближайшей
+        // точке пересечения сферы с лучом
+        if(alpha1 >= 0) {
+            *point = line.A + alpha1 * v;
+            return true;
+        } else if(alpha2 >= 0) {
+            *point = line.A + alpha2 * v;
+            return true;
         } else {
-            // берем меньший корень
-            ld alpha = (-b - sqrtl(D)) / (2 * a);
-            *point = line.A + alpha * v;
+            // иначе луч не пересекает сферу
             return true;
         }
     }
