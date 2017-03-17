@@ -57,3 +57,8 @@ Color Sphere::get_color(Point3D &point) const
 {
     return color;
 }
+
+Point3D Sphere::get_normal(Point3D &point) const
+{
+    return (point - center) / (point - center).len();
+}

@@ -22,6 +22,9 @@ public:
     // Цвет объекта в указанной точке
     Color get_color(Point3D & point) const;
 
+    // Единичная внешняя нормаль к сфере в указанной точке
+    Point3D get_normal(Point3D &point) const;
+
 private:
     // центр сферы
     Point3D center;

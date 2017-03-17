@@ -5,12 +5,17 @@
 #include "Triangle.h"
 #include "geometry.h"
 
-Triangle::Triangle(Point3D _A, Point3D _B, Point3D _C, Color _color) :
+Triangle::Triangle(Point3D _A, Point3D _B, Point3D _C, Color _color, Point3D _n) :
     A(_A),
     B(_B),
     C(_C),
     color(_color)
 {
+    if(_n == Point3D{0, 0, 0}) {
+        n = ((B - A) * (C - A)) * (1 / ((B - A) * (C - A)).len());
+    } else {
+        n = _n / _n.len();
+    }
 }
 
 bool Triangle::ray_intersection(Line3D & line, Point3D* point) const
@@ -40,4 +45,9 @@ bool Triangle::ray_intersection(Line3D & line, Point3D* point) const
 Color Triangle::get_color(Point3D &point) const
 {
     return color;
+}
+
+Point3D Triangle::get_normal(Point3D &point) const
+{
+    return n;
 }
