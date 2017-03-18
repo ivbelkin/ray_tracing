@@ -4,8 +4,6 @@
 
 int main()
 {
-    std::cout << "start" << std::endl;
-    test6();
-    std::cout << "finish" << std::endl;
+    test_all();
     return 0;
 }

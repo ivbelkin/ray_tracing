@@ -8,8 +8,8 @@
 
 #include <cassert>
 
-double Light::norm_power = 1;
-double Light::norm_distance = 1;
+ld Light::norm_power = 1;
+ld Light::norm_distance = 1;
 
 Light::Light(Point3D _position, double _power, Color _color) :
     position(_position),

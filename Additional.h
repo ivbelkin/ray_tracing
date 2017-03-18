@@ -8,6 +8,9 @@
 #include "geometry.h"
 #include <cmath>
 
+#include <cassert>
+#include <iostream>
+
 // Цвет
 class Color {
 public:
@@ -17,67 +20,77 @@ public:
         blue_inten(0)
     {}
 
-    Color(int _red, int _green, int _blue)
+    Color(ld _red, ld _green, ld _blue)
     {
         compare_and_set(&red_inten, _red);
         compare_and_set(&green_inten, _green);
         compare_and_set(&blue_inten, _blue);
     }
 
+    Color(int _red, int _green, int _blue) :
+            Color((ld)_red / 255,
+                  (ld)_green / 255,
+                  (ld)_blue / 255)
+    {}
+
     Color operator+(Color c) const
     {
-        return Color{std::min((int)red_inten + c.red_inten, 255),
-                     std::min((int)green_inten + c.green_inten, 255),
-                     std::min((int)blue_inten + c.blue_inten, 255)};
+        return Color(red_inten + c.red_inten,
+                     green_inten + c.green_inten,
+                     blue_inten + c.blue_inten);
     }
 
     Color operator*(ld num) const
     {
-        return Color(std::min(int(num * red_inten), 255),
-                     std::min(int(num * green_inten), 255),
-                     std::min(int(num * blue_inten), 255));
+        return Color(num * red_inten,
+                     num * green_inten,
+                     num * blue_inten);
     }
 
     Color operator/(ld num) const
     {
-        return Color((unsigned char)((ld)red_inten / num),
-                     (unsigned char)((ld)green_inten / num),
-                     (unsigned char)((ld)blue_inten / num));
+        return Color(red_inten / num,
+                     green_inten / num,
+                     blue_inten / num);
     }
 
     Color operator^(Color mask) const
     {
-        return Color((unsigned char)((ld)red_inten * mask.red_inten / 255),
-                     (unsigned char)((ld)green_inten * mask.green_inten / 255),
-                     (unsigned char)((ld)blue_inten * mask.blue_inten / 255));
+        return Color(red_inten * mask.red_inten,
+                     green_inten * mask.green_inten,
+                     blue_inten * mask.blue_inten);
     }
 
-    inline unsigned char red()
+    inline int red()
     {
-        return red_inten;
+        return int(red_inten * 255);
     }
 
-    inline unsigned char green()
+    inline int green()
     {
-        return green_inten;
+        return int(green_inten * 255);
     }
 
-    inline unsigned char blue()
+    inline int blue()
     {
-        return blue_inten;
+        return int(blue_inten * 255);
     }
 
 private:
-    unsigned char red_inten;
-    unsigned char green_inten;
-    unsigned char blue_inten;
+    ld red_inten;
+    ld green_inten;
+    ld blue_inten;
 
-    void compare_and_set(unsigned char *c, int _c)
+    void compare_and_set(ld *c, ld _c)
     {
-        if(_c >= 0 && _c < 256) {
-            *c = _c;
+        if(isMoreEqual(_c, 0.0)) {
+            if(isLessEqual(_c, 1.0)) {
+                *c = _c;
+            } else {
+                *c = 1.0;
+            }
         } else {
-            *c = 0;
+            *c = 0.0;
         }
     }
 };

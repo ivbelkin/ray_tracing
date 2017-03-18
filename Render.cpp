@@ -6,6 +6,8 @@
 #include <iostream>
 #include <cassert>
 
+const ld eps = 1e-3;
+
 Render::Render() :
     depth(0)
 {
@@ -95,13 +97,18 @@ Color Render::get_color_point(Line3D ray, int d)
 
         // опрашиваем источники света
         for(Light *light : scene->lights) {
-            // проверяем, нет ли тени от других объектов
-            if(is_reachable(object, intersection, light->get_position())) {
-                // цвет от источника
-                Color c = light->get_color(intersection, normal);
+            // проверяем, идет ли рассеяный свет к наблюдателю
+            if(((ray.A - ray.B)^normal) *
+               ((light->get_position() - intersection)^normal) >= 0)
+            {
+                // проверяем, нет ли тени от других объектов
+                if(is_reachable(object, intersection, light->get_position())) {
+                    // цвет от источника
+                    Color c = light->get_color(intersection, normal);
 
-                // добавляем к уже полученному освещению объекта
-                color = color + (obj_color ^ c);
+                    // добавляем к уже полученному освещению объекта
+                    color = color + (obj_color ^ c);
+                }
             }
         }
         return color;
@@ -146,7 +153,8 @@ bool Render::is_reachable(Shape *obj, Point3D A, Point3D B)
 {
     Shape *object;
     Point3D intersection;
-    if(ray_trace(Line3D{A, B}, &intersection, &object)) {
+    // немного отступаем от поверхности в сторону B и запускае луч
+    if(ray_trace(Line3D{A + eps * (B - A), B}, &intersection, &object)) {
         return obj == object;
     }
     return true;

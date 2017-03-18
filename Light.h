@@ -13,7 +13,7 @@
 class Light { // TODO
 public:
     // Источник в заданной позиции, заданной мощности и цвета
-    Light(Point3D _position, double _power, Color _color = {255, 255, 255});
+    Light(Point3D _position, double _power, Color _color = Color(255, 255, 255));
 
     // Освещенность малой площадки, помещенной в точку point
     // с вектором нормали normal
@@ -33,8 +33,8 @@ private:
     Color color;
 
     // нормировочные коэфиициенты
-    static double norm_power;
-    static double norm_distance;
+    static ld norm_power;
+    static ld norm_distance;
 };
 
 #endif //RAY_TRACING_LIGHT_H
