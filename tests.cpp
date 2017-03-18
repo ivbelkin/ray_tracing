@@ -8,10 +8,21 @@
 #include "Additional.h"
 #include "Triangle.h"
 #include "Sphere.h"
+#include "Light.h"
 #include "Scene.h"
 #include "Window.h"
 
 #include <iostream>
+
+void test_all()
+{
+    test1();
+    test2();
+    test3();
+    test4();
+    test5();
+    test6();
+}
 
 void test1()
 {
@@ -42,6 +53,9 @@ void test1()
     sc.add_shape(&triangle2);
     sc.add_shape(&triangle3);
 
+    sc.backgroud = Color{50, 50, 50};
+    sc.backlight = Color(100, 100, 100);
+
     Point3D point{0, 0, 5};
 
     rt::Window win(300, 300);
@@ -69,6 +83,9 @@ void test2()
     sc.add_shape(&t1);
     sc.add_shape(&t2);
 
+    sc.backgroud = Color{50, 50, 50};
+    sc.backlight = Color(100, 100, 100);
+
     rt::Window win(300, 300);
 
     Render render;
@@ -94,6 +111,9 @@ void test3()
     sc.add_shape(&t2);
     sc.add_shape(&t3);
 
+    sc.backgroud = Color{50, 50, 50};
+    sc.backlight = Color(100, 100, 100);
+
     rt::Window win(300, 300);
 
     Render render;
@@ -115,6 +135,9 @@ void test4()
     Scene sc;
     sc.add_shape(&t1);
     sc.add_shape(&t2);
+
+    sc.backgroud = Color{50, 50, 50};
+    sc.backlight = Color(100, 100, 100);
 
     rt::Window win(300, 300);
 
@@ -140,12 +163,47 @@ void test5()
     sc.add_shape(&t1);
     sc.add_shape(&t2);
 
+    sc.backgroud = Color{50, 50, 50};
+    sc.backlight = Color(100, 100, 100);
+
     rt::Window win(300, 300);
 
     Render render;
     render.set_window(&win, {-5, 5, 4}, {-5, -5, 4}, {5, 5, 4});
     render.set_scene(&sc);
     render.set_viewpoint({0, 0, 10});
+
+    render.draw();
+
+    win.show();
+}
+
+void test6()
+{
+    Sphere s1({0, 0, 2}, 2, {100, 100, 100});
+    Sphere s2({30, -60, 0}, 5, {0, 200, 0});
+    Light l1({-2, 6, 7}, 40, {0, 100, 255});
+    Light l2({20, -50, 20}, 400);
+    Triangle t1({0, 12, 0}, {80, -100, 0}, {-80, -100, 0}, {200, 50, 50}, {0, 0, 1});
+    Triangle t2({30, -50, 7}, {40, -70, 7}, {20, -70, 7}, {200, 50, 50}, {0, 0, 1});
+
+    Scene sc;
+    sc.add_shape(&s1);
+    sc.add_shape(&s2);
+    sc.add_light(&l1);
+    sc.add_light(&l2);
+    sc.add_shape(&t1);
+    sc.add_shape(&t2);
+
+    sc.backgroud = Color{100, 100, 100};
+    sc.backlight = Color(10, 10, 10);
+
+    rt::Window win(600, 600);
+
+    Render render;
+    render.set_window(&win, {2, 8, 4}, {2, 8, 0}, {-2, 8, 4});
+    render.set_scene(&sc);
+    render.set_viewpoint({0, 12, 2});
 
     render.draw();
 

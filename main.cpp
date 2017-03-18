@@ -4,11 +4,8 @@
 
 int main()
 {
-    test1();
-    test2();
-    test3();
-    test4();
-    test5();
-
+    std::cout << "start" << std::endl;
+    test6();
+    std::cout << "finish" << std::endl;
     return 0;
 }

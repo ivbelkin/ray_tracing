@@ -5,6 +5,9 @@
 #ifndef RAY_TRACING_TESTS_H
 #define RAY_TRACING_TESTS_H
 
+// запуск на всех тестах
+void test_all();
+
 // треугольники на плоскости
 void test1();
 
@@ -20,7 +23,10 @@ void test3();
 // один за точкой наблюдения
 void test4();
 
-// сфера
+// сфера, пересеченная с треугольниками
 void test5();
+
+// сфера и источник освещения
+void test6();
 
 #endif //RAY_TRACING_TESTS_H

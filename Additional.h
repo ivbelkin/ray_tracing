@@ -6,6 +6,7 @@
 #define RAY_TRACING_ADDITIONAL_H
 
 #include "geometry.h"
+#include <cmath>
 
 // Цвет
 class Color {
@@ -23,41 +24,55 @@ public:
         compare_and_set(&blue_inten, _blue);
     }
 
-    Color operator+(Color & c) const
+    Color operator+(Color c) const
     {
-        return Color{red_inten + c.red_inten,
-                     green_inten + c.green_inten,
-                     blue_inten + c.blue_inten};
+        return Color{std::min((int)red_inten + c.red_inten, 255),
+                     std::min((int)green_inten + c.green_inten, 255),
+                     std::min((int)blue_inten + c.blue_inten, 255)};
     }
 
     Color operator*(ld num) const
     {
-        return Color(char((ld)red_inten * num),
-                     char((ld)green_inten * num),
-                     char((ld)blue_inten * num));
+        return Color(std::min(int(num * red_inten), 255),
+                     std::min(int(num * green_inten), 255),
+                     std::min(int(num * blue_inten), 255));
     }
 
-    inline char red()
+    Color operator/(ld num) const
+    {
+        return Color((unsigned char)((ld)red_inten / num),
+                     (unsigned char)((ld)green_inten / num),
+                     (unsigned char)((ld)blue_inten / num));
+    }
+
+    Color operator^(Color mask) const
+    {
+        return Color((unsigned char)((ld)red_inten * mask.red_inten / 255),
+                     (unsigned char)((ld)green_inten * mask.green_inten / 255),
+                     (unsigned char)((ld)blue_inten * mask.blue_inten / 255));
+    }
+
+    inline unsigned char red()
     {
         return red_inten;
     }
 
-    inline char green()
+    inline unsigned char green()
     {
         return green_inten;
     }
 
-    inline char blue()
+    inline unsigned char blue()
     {
         return blue_inten;
     }
 
 private:
-    char red_inten;
-    char green_inten;
-    char blue_inten;
+    unsigned char red_inten;
+    unsigned char green_inten;
+    unsigned char blue_inten;
 
-    void compare_and_set(char *c, int _c)
+    void compare_and_set(unsigned char *c, int _c)
     {
         if(_c >= 0 && _c < 256) {
             *c = _c;

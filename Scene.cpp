@@ -14,3 +14,12 @@ bool Scene::add_shape(Shape *obj)
 
     return true;
 }
+
+bool Scene::add_light(Light *obj)
+{
+    assert(obj != nullptr);
+
+    lights.push_back(obj);
+
+    return true;
+}

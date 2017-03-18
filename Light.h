@@ -9,15 +9,18 @@
 
 #include "geometry.h"
 
-// Источник белого света
+// Источник света света
 class Light { // TODO
 public:
-    // Источник в заданной позиции и заданной мощности
-    Light(Point3D _position, double _power);
+    // Источник в заданной позиции, заданной мощности и цвета
+    Light(Point3D _position, double _power, Color _color = {255, 255, 255});
 
     // Освещенность малой площадки, помещенной в точку point
-    // перпендикулярно вектору (point - position)
-    Color get_color(Point3D point) const;
+    // с вектором нормали normal
+    Color get_color(Point3D point, Point3D normal) const;
+
+    // Положение источника на сцене
+    Point3D get_position() const;
 
 private:
     // положение источника
@@ -25,6 +28,9 @@ private:
 
     // мощность источника
     double power;
+
+    // цвет источника света
+    Color color;
 
     // нормировочные коэфиициенты
     static double norm_power;
