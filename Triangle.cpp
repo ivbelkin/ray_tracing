@@ -5,36 +5,34 @@
 #include "Triangle.h"
 #include "geometry.h"
 
-Triangle::Triangle(Point3D _A, Point3D _B, Point3D _C, Color _color, Point3D _n) :
-    A(_A),
-    B(_B),
-    C(_C),
-    color(_color)
+Triangle::Triangle(Point3D _A, Point3D _B, Point3D _C, Point3D _n)
 {
-    if(_n == Point3D{0, 0, 0}) {
-        n = ((B - A) * (C - A)) * (1 / ((B - A) * (C - A)).len());
-    } else {
-        n = _n / _n.len();
-    }
+    init(_A, _B, _C, _n);
 }
 
-bool Triangle::ray_intersection(Line3D & line, Point3D* point) const
+Triangle::Triangle(Point3D _A, Point3D _B, Point3D _C, Color _color, Point3D _n) :
+        Shape(_color)
 {
-    ld tp = tripleProduct(C - A, line.B - line.A, B - A);
+    init(_A, _B, _C, _n);
+}
+
+bool Triangle::ray_intersection(Point3D p, Point3D v, Point3D *point) const
+{
+    ld tp = tripleProduct(C - A, v, B - A);
     // проверка на существование точки пересечения с плоскостью треугольника
     if(isZero(tp)) {
         return false;
     } else {
         // координаты точки пересечения в базисе (AB, AC) на плоскости
-        ld alpha = -tripleProduct(C - A, line.B - line.A, A - line.A) / tp;
-        ld beta = tripleProduct(B - A, line.B - line.A, A - line.A) / tp;
+        ld alpha = -tripleProduct(C - A, v, A - p) / tp;
+        ld beta = tripleProduct(B - A, v, A - p) / tp;
 
         // проверка на принадлежность точки пересечения треугольнику
         if(alpha >= 0 && beta >= 0 && alpha + beta <= 1) {
-            Point3D p = A + alpha * (B - A) + beta * (C - A);
+            Point3D pp = A + alpha * (B - A) + beta * (C - A);
             // проверка на пересечение с лучом
-            if(((line.B - line.A) ^ (p - line.A)) > 0) {
-                *point = p;
+            if(((v) ^ (pp - p)) > 0) {
+                *point = pp;
                 return true;
             }
         }
@@ -42,12 +40,32 @@ bool Triangle::ray_intersection(Line3D & line, Point3D* point) const
     }
 }
 
-Color Triangle::get_color(Point3D &point) const
-{
-    return color;
-}
-
 Point3D Triangle::get_normal(Point3D &point) const
 {
     return n;
+}
+
+Point3D Triangle::reflected_ray(Point3D v, Point3D point) const
+{
+    Point3D N = get_normal(point);
+    ld alpha = -1.0 * N ^ v;
+    return point + v + 2 * alpha * N;
+}
+
+void Triangle::set_normal(Point3D _n)
+{
+    // если получен нулевой вектор, то ставим правовинтовую нормаль
+    if(_n == Point3D{0, 0, 0}) {
+        n = ((B - A) * (C - A)) * (1 / ((B - A) * (C - A)).len());
+    } else {
+        n = _n / _n.len();
+    }
+}
+
+void Triangle::init(Point3D _A, Point3D _B, Point3D _C, Point3D _n)
+{
+    A = _A;
+    B = _B;
+    C = _C;
+    set_normal(_n);
 }

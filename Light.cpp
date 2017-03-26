@@ -19,12 +19,11 @@ Light::Light(Point3D _position, double _power, Color _color) :
     power = _power;
 }
 
-Color Light::get_color(Point3D point, Point3D normal) const
+Color Light::get_intensity(Point3D point) const
 {
     ld coef = norm_distance * norm_distance * power / norm_power;
-    ld cos_r_n = (ld)(normal ^ (position - point)) / (point - position).len();
 
-    return color * (coef * cos_r_n / (point - position).len2());
+    return color * (coef / (point - position).len2());
 }
 
 Point3D Light::get_position() const

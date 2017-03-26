@@ -7,17 +7,42 @@
 
 #include "geometry.h"
 #include "Additional.h"
+#include "Material.h"
 
 class Shape {
 public:
-    // Первое пересечение объекта с лучом
-    virtual bool ray_intersection(Line3D &line, Point3D *point) const = 0;
+    // нет данных о материале
+    Shape();
 
-    // Цвет объекта в указанной точке
-    virtual Color get_color(Point3D &point) const = 0;
+    // устанавливается модель чисто диффузного отражения
+    explicit Shape(Color color);
+
+    // Первое пересечение объекта с лучом с началом в p и направлением v
+    // в point сохраняется точка пересечения
+    virtual bool ray_intersection(Point3D p, Point3D v, Point3D *point) const = 0;
+
+    // Отраженный в точке point луч с направлением v
+    virtual Point3D reflected_ray(Point3D v, Point3D point) const = 0;
+
+    // TODO
+    // Преломленный при проходе через поверхность объекта луч
+    // virtual Line3D get_refracted_ray(Line3D &ray, Point3D point) const = 0;
 
     // Единичная внешняя нормаль к объекту в указанной точке
     virtual Point3D get_normal(Point3D &point) const = 0;
+
+    // Получить структуру, описывающую своиства материала и модель отражения
+    const Material* get_material() const;
+
+    // Установить материал, старая структура удаляется
+    void set_material(const Material *_material);
+
+    // Установить материал, старая структура не удаляется
+    void reset_material(const Material *_material);
+
+private:
+    // данные о материале и модели отражения
+    const Material *material;
 };
 
 #endif //RAY_TRACING_SHAPE_H

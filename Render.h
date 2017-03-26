@@ -53,18 +53,45 @@ private:
     Color get_color_xy(int x, int y);
 
     // определяет цвет, который увидел бы наблюдатель
-    // в центре поля зрения если бы находился в точке ray.A
-    // и смотрел в направлении вектора (ray.B - ray.A)
-    Color get_color_point(Line3D ray, int d);
+    // в центре поля зрения если бы находился в точке p
+    // и смотрел в направлении вектора v
+    Color get_color_point(Point3D p, Point3D v, int d);
 
     // находит первое пересечение луча с объектом сцены, сохраняет
     // точку пересечения и указатель на объект и возвращает true,
     // если пересечения нет - возвращает false
-    bool ray_trace(Line3D ray, Point3D *nearest_intersection, Shape **obj);
+    bool ray_trace(Point3D p, Point3D v, Point3D *nearest_intersection, Shape **object);
 
-    // проверяет, достижима ли B из точки A объекта obj по прямой,
+    // проверяет, достижима ли B из точки A некоторого объекта по прямой,
     // не пересекая другие объекты
-    bool is_reachable(Shape *obj, Point3D A, Point3D B);
+    bool is_reachable(Point3D A, Point3D B);
+
+
+    // модели освещения
+
+    // illum 0
+    // цвет объекта не зависит ни от чего
+    Color constant_illum(Shape *obj);
+
+    // illum 1
+    // цвет определяется фоновым освещением и диффузным рассеиванием
+    Color diffuse_illum(Point3D point, Point3D viev_vector, Shape *obj);
+
+    // illum 2
+    // к диффузному рассеиванию добавляется бликовое
+    Color specular_illum(Point3D point, Point3D viev_vector, Shape *obj);
+
+    // illum 8, 9
+    // добавляется карта отражений
+    Color map_illum(Point3D point, Point3D viev_vector, Shape *obj);
+
+    // illum 3, 4
+    // добавляются вторичные источники
+    Color multireflect_illum(Point3D point, Point3D viev_vector, Shape *obj);
+
+    // illum 6
+    // добавляется преломление лучей
+    Color multirefract_illum(Point3D point, Point3D viev_vector, Shape *obj);
 };
 
 #endif //RAY_TRACING_RENDER_H

@@ -29,4 +29,7 @@ void test5();
 // сфера и источник освещения
 void test6();
 
+// считывание моделей из obj фаила
+// void test7();
+
 #endif //RAY_TRACING_TESTS_H
