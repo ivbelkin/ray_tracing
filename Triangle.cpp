@@ -45,13 +45,6 @@ Point3D Triangle::get_normal(Point3D &point) const
     return n;
 }
 
-Point3D Triangle::reflected_ray(Point3D v, Point3D point) const
-{
-    Point3D N = get_normal(point);
-    ld alpha = -1.0 * N ^ v;
-    return point + v + 2 * alpha * N;
-}
-
 void Triangle::set_normal(Point3D _n)
 {
     // если получен нулевой вектор, то ставим правовинтовую нормаль
@@ -69,3 +62,5 @@ void Triangle::init(Point3D _A, Point3D _B, Point3D _C, Point3D _n)
     C = _C;
     set_normal(_n);
 }
+
+

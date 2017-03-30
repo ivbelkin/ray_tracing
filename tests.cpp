@@ -23,7 +23,7 @@ void test_all()
     test4();
     test5();
     test6();
-    //test7();
+    test7();
 }
 
 void test1()
@@ -182,12 +182,14 @@ void test5()
 
 void test6()
 {
-    Sphere s1({0, 0, 2}, 2, Color(0, 200, 100));
+    Sphere s1({0, 0, 2}, 2, Color(100, 50, 50));
     Sphere s2({30, -60, 0}, 5, Color(0, 200, 0));
     Light l1({-2, 6, 7}, 50, Color(100, 100, 100));
-    Light l2({20, -40, 20}, 400);
+    Light l2({20, -40, 20}, 4000);
     Triangle t1({0, 12, 0}, {80, -100, 0}, {-80, -100, 0}, Color(200, 50, 50), {0, 0, 1});
     Triangle t2({30, -50, 2}, {20, -70, 7}, {40, -70, 7}, Color(200, 50, 50));
+
+    //Triangle t3({0, 5, 10}, {-5, 5, 0}, {5, 5, 0}, Color(10, 10, 10));
 
     Scene sc;
     sc.add_shape(&s1);
@@ -196,9 +198,10 @@ void test6()
     sc.add_light(&l2);
     sc.add_shape(&t1);
     sc.add_shape(&t2);
+    //sc.add_shape(&t3);
 
     sc.backgroud = Color(0, 0, 0);
-    sc.backlight = Color(50, 50, 50);
+    sc.backlight = Color(100, 100, 100);
 
     rt::Window win(600, 600);
 

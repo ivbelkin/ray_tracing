@@ -21,15 +21,14 @@ public:
     // в point сохраняется точка пересечения
     virtual bool ray_intersection(Point3D p, Point3D v, Point3D *point) const = 0;
 
-    // Отраженный в точке point луч с направлением v
-    virtual Point3D reflected_ray(Point3D v, Point3D point) const = 0;
-
-    // TODO
-    // Преломленный при проходе через поверхность объекта луч
-    // virtual Line3D get_refracted_ray(Line3D &ray, Point3D point) const = 0;
-
     // Единичная внешняя нормаль к объекту в указанной точке
     virtual Point3D get_normal(Point3D &point) const = 0;
+
+    // Отраженный в точке point луч с направлением v
+    Point3D reflected_ray(Point3D v, Point3D point) const;
+
+    // Преломленный при проходе через поверхность объекта луч
+    Point3D refracted_ray(Point3D v, Point3D point) const;
 
     // Получить структуру, описывающую своиства материала и модель отражения
     const Material* get_material() const;

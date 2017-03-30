@@ -21,9 +21,6 @@ public:
     // Пересечение сферы с лучом
     bool ray_intersection(Point3D p, Point3D v, Point3D *point) const;
 
-    // отраженный от сферы луч
-    Point3D reflected_ray(Point3D v, Point3D point) const;
-
     // Единичная внешняя нормаль к сфере в указанной точке
     Point3D get_normal(Point3D &point) const;
 

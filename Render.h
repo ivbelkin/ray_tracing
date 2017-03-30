@@ -66,32 +66,8 @@ private:
     // не пересекая другие объекты
     bool is_reachable(Point3D A, Point3D B);
 
-
-    // модели освещения
-
-    // illum 0
-    // цвет объекта не зависит ни от чего
-    Color constant_illum(Shape *obj);
-
-    // illum 1
-    // цвет определяется фоновым освещением и диффузным рассеиванием
-    Color diffuse_illum(Point3D point, Point3D viev_vector, Shape *obj);
-
-    // illum 2
-    // к диффузному рассеиванию добавляется бликовое
-    Color specular_illum(Point3D point, Point3D viev_vector, Shape *obj);
-
-    // illum 8, 9
-    // добавляется карта отражений
-    Color map_illum(Point3D point, Point3D viev_vector, Shape *obj);
-
-    // illum 3, 4
-    // добавляются вторичные источники
-    Color multireflect_illum(Point3D point, Point3D viev_vector, Shape *obj);
-
-    // illum 6
-    // добавляется преломление лучей
-    Color multirefract_illum(Point3D point, Point3D viev_vector, Shape *obj);
+    // составляющая цвета, зависящая от первичных источников
+    Color scan_lights(Point3D point, Point3D view_vector, Shape *obj);
 };
 
 #endif //RAY_TRACING_RENDER_H

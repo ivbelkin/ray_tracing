@@ -48,16 +48,9 @@ bool Sphere::ray_intersection(Point3D p, Point3D v, Point3D *point) const
             return true;
         } else {
             // иначе луч не пересекает сферу
-            return true;
+            return false;
         }
     }
-}
-
-Point3D Sphere::reflected_ray(Point3D v, Point3D point) const
-{
-    Point3D N = get_normal(point);
-    ld alpha = -1.0 * N ^ v;
-    return point + v + 2 * alpha * N;
 }
 
 Point3D Sphere::get_normal(Point3D &point) const

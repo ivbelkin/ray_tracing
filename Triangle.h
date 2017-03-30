@@ -25,9 +25,6 @@ public:
     // Пересечение треугольника с лучом
     bool ray_intersection(Point3D p, Point3D v, Point3D *point) const;
 
-    // Отраженный в точке луч
-    Point3D reflected_ray(Point3D v, Point3D point) const;
-
     // Единичная внешняя нормаль к треугольнику в указанной точке
     Point3D get_normal(Point3D &point) const;
 

@@ -13,6 +13,8 @@
 
 // Цвет
 class Color {
+    friend Color operator-(ld num, Color color);
+
 public:
     Color() :
         red_inten(0),
@@ -38,6 +40,18 @@ public:
         return Color(red_inten + c.red_inten,
                      green_inten + c.green_inten,
                      blue_inten + c.blue_inten);
+    }
+
+    Color operator+(ld num) const
+    {
+        return Color(red_inten + num,
+                     green_inten + num,
+                     blue_inten + num);
+    }
+
+    Color operator-(ld num) const
+    {
+        return *this + (-num);
     }
 
     Color operator*(ld num) const
@@ -95,25 +109,16 @@ private:
     }
 };
 
-// Плоская волна определенного цвета и направления
-struct Wave {
-    Wave(Color c, Point3D p)
-    {
-        color = c;
-        k = p * (1.0 / p.len());
-    }
+inline Color operator+(ld num, Color color)
+{
+    return color + num;
+}
 
-    // Цвет
-    Color color;
-
-    // Направление. Единичный вектор
-    Point3D k;
-
-    // Проекция волны на вектор n
-    Wave operator^(Point3D n) const
-    {
-        return Wave(color * ((k ^ n) / n.len()), (k ^ n) / n.len() * n);
-    }
-};
+inline Color operator-(ld num, Color color)
+{
+    return Color(num - color.red_inten,
+                 num - color.green_inten,
+                 num - color.blue_inten);
+}
 
 #endif //RAY_TRACING_ADDITIONAL_H

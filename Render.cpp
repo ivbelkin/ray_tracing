@@ -10,7 +10,7 @@
 const ld eps = 1e-3;
 
 Render::Render() :
-    depth(0)
+    depth(2)
 {
     window = nullptr;
     scene = nullptr;
@@ -72,13 +72,13 @@ Color Render::get_color_xy(int x, int y)
     // через текущюю точку экрана, а также его длина
     Point3D xy = to_point(x, y);
 
-    return get_color_point(xy, xy - viewpoint, 0);
+    return get_color_point(xy, xy - viewpoint, depth);
 }
 
 Color Render::get_color_point(Point3D p, Point3D v, int d)
 {
     // проверяем, не глубоко ли опустилась рекурсия
-    if(d > depth) {
+    if(d < 0) {
         return Color{0, 0, 0};
     }
     Point3D intersection;
@@ -90,27 +90,51 @@ Color Render::get_color_point(Point3D p, Point3D v, int d)
         const Material *obj_mat = object->get_material();
 
         // итоговый цвет
-        Color color;
+        Color color(0, 0, 0);
 
-        // единичный вектор в точку наблюдения
-        Point3D view_vector = -1.0 * v / v.len(); // TODO
-
-        // в зависимости от модели освещения находим цвет
+        // вычисляем цвет в зависимости от установленной модели отражения
         if(obj_mat->illum == 0) {
-            color = constant_illum(object);
-        } else if(obj_mat->illum == 1) {
-            color = diffuse_illum(intersection, view_vector, object);
-        } else if(obj_mat->illum == 2) {
-            color = specular_illum(intersection, view_vector, object);
-        }
+            // цвет ни от чего не зависит
+            color = obj_mat->Kd;
+        } else {
+            // фоновое освещение
+            color = obj_mat->Ka ^ scene->backlight;
 
+            // единичный вектор в точку наблюдения
+            Point3D view_vector = -1.0 * v.unit();
+
+            // нормаль в точке
+            // Point3D normal = object->get_normal(intersection);
+
+            // считаем составляющую от первичных источников
+            color = color + scan_lights(intersection, view_vector, object);
+
+            // считаем составляющие от вторичных источников
+            if(obj_mat->illum > 2) {
+                // отраженный луч наблюдения
+                Point3D reflected = object->reflected_ray(v, intersection);
+
+                // ищем рекурсивно дополнительный цвет
+                Color Ir = get_color_point(intersection + eps * reflected, reflected, d - 1);
+                color = color + (obj_mat->Ks ^ Ir);
+            }
+
+            // считаем составляющие от преломления
+            if(obj_mat->illum == 6) {
+                // преломленный луч наблюдения
+                Point3D refracted = object->refracted_ray(v, intersection);
+
+                // ищем рекурсивно дополнительный цвет
+                Color It = get_color_point(intersection + eps * refracted, refracted, d - 1);
+                color = color + ((1.0 - obj_mat->Ks) ^ obj_mat->Tf ^ It);
+            }
+        }
         return color;
     } else {
         // цвет по-умолчанию, на бесконечности
         return scene->backgroud;
     }
 }
-
 
 bool Render::ray_trace(Point3D p, Point3D v, Point3D *nearest_intersection, Shape **object)
 {
@@ -156,26 +180,19 @@ bool Render::is_reachable(Point3D A, Point3D B)
     return true;
 }
 
-Color Render::constant_illum(Shape *obj)
-{
-    return obj->get_material()->Kd;
-}
-
-Color Render::diffuse_illum(Point3D point, Point3D viev_vector, Shape *obj)
+Color Render::scan_lights(Point3D point, Point3D view_vector, Shape *obj)
 {
     // материал объекта
     const Material *mt = obj->get_material();
 
-    // базовый цвет
-    Color color = obj->get_material()->Ka ^ scene->backlight;
-
     // нормаль в точке
     Point3D normal = obj->get_normal(point);
 
-    // накладываем диффузный цвет
+    Color color(0, 0, 0);
+    // проходим по всем первичным источникам
     for(Light *light : scene->lights) {
-        // проверяем, идет ли рассеяный свет к наблюдателю
-        if(((viev_vector)^normal) *
+        // проверяем, идет ли отраженный свет к наблюдателю
+        if(((view_vector)^normal) *
            ((light->get_position() - point)^normal) >= 0)
         {
             // проверяем, нет ли тени от других объектов
@@ -184,63 +201,22 @@ Color Render::diffuse_illum(Point3D point, Point3D viev_vector, Shape *obj)
                 Color inten = light->get_intensity(point);
 
                 // единичный вектор в сторону источника
-                Point3D light_vector = (light->get_position() - point) / (light->get_position() - point).len();
+                Point3D light_vector = (light->get_position() - point).unit();
 
-                // вклад от источника
+                // вклад за счет диффузного отражения
                 color = color + (mt->Kd ^ inten) * (normal ^ light_vector);
+
+                // вклад за счет прямого отражения
+                if(mt->illum >= 2) {
+                    // направляющий вектор отраженного луча
+                    Point3D reflected = obj->reflected_ray(-1.0 * light_vector, point);
+
+                    // вклад от источника
+                    ld coef = powl((std::max(reflected.unit() ^ view_vector, 0.0l)), mt->Ns);
+                    color = color + (mt->Ks ^ inten) * coef;
+                }
             }
         }
     }
     return color;
-}
-
-Color Render::specular_illum(Point3D point, Point3D viev_vector, Shape *obj)
-{
-    // материал объекта
-    const Material *mt = obj->get_material();
-
-    // нормаль в точке
-    Point3D normal = obj->get_normal(point);
-
-    // базовый диффузный цвет
-    Color color = diffuse_illum(point, viev_vector, obj);
-
-    // накладываем блики
-    for(Light *light : scene->lights) {
-        // проверяем, идет ли рассеяный свет к наблюдателю
-        if(((viev_vector)^normal) *
-           ((light->get_position() - point)^normal) >= 0)
-        {
-            // проверяем, нет ли тени от других объектов
-            if(is_reachable(point, light->get_position())) {
-                // интенсивность света от источника
-                Color inten = light->get_intensity(point);
-
-                // единичный вектор в сторону источника
-                Point3D light_vector = (light->get_position() - point) / (light->get_position() - point).len();
-
-                // направляющий вектор отраженного луча
-                Point3D reflected = obj->reflected_ray(-1.0 * light_vector, point);
-
-                // вклад от источника
-                color = color + (mt->Ks ^ inten) * powl((std::max(reflected ^ viev_vector, 0.0l)), mt->Ns) / reflected.len();
-            }
-        }
-    }
-    return color;
-}
-
-Color Render::map_illum(Point3D point, Point3D viev_vector, Shape *obj)
-{
-    return Color();
-}
-
-Color Render::multireflect_illum(Point3D point, Point3D viev_vector, Shape *obj)
-{
-    return Color();
-}
-
-Color Render::multirefract_illum(Point3D point, Point3D viev_vector, Shape *obj)
-{
-    return Color();
 }
