@@ -64,3 +64,10 @@ void Sphere::init(Point3D _center, ld _radius)
     assert(_radius > 0);
     radius = _radius;
 }
+
+void Sphere::limiting_box(Point3D *A, Point3D *B) const
+{
+    Point3D bias{radius + eps, radius + eps, radius + eps};
+    *A = center - bias;
+    *B = center + bias;
+}

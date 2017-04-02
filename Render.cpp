@@ -7,6 +7,8 @@
 #include <cassert>
 #include <cmath>
 
+#include <ctime>
+
 const ld eps = 1e-3;
 
 Render::Render() :
@@ -49,8 +51,16 @@ void Render::draw()
     assert(window != nullptr);
     assert(scene != nullptr);
 
+    std::cout << "Build..." << std::endl;
+
+    tree.build_from_shapes(scene->shapes);
+
     int height = window->get_height();
     int width = window->get_width();
+
+    std::cout << "Rendering..." << std::endl;
+
+    time_t time1 = clock();
 
     for(int y = 0; y < height; ++y) {
         for(int x = 0; x < width; ++x) {
@@ -58,6 +68,10 @@ void Render::draw()
             window->set_pixel_at(x, y, c);
         }
     }
+
+    time1 = clock() - time1;
+
+    std::cerr << "Time: " << (ld)time1 / CLOCKS_PER_SEC << std::endl;
 }
 
 Point3D Render::to_point(int x, int y)
@@ -138,33 +152,7 @@ Color Render::get_color_point(Point3D p, Point3D v, int d)
 
 bool Render::ray_trace(Point3D p, Point3D v, Point3D *nearest_intersection, Shape **object)
 {
-    // расстояние до ближайшей точки пересечения
-    ld cur_min_len2 = 1e50;
-
-    // флаг существования пересечения
-    bool F = false;
-
-    // перебираем объекты сцены
-    for(Shape *obj: scene->shapes) {
-        // точка пересечения луча и объекта
-        Point3D intersection;
-
-        // есть ли пересечение объекта с лучом?
-        if(obj->ray_intersection(p, v, &intersection)) {
-            // выбираем самое близкое пересечение
-            ld len2 = (viewpoint - intersection).len2();
-            if(len2 < cur_min_len2) {
-                // обновляем данные
-                cur_min_len2 = len2;
-                *nearest_intersection = intersection;
-                *object = obj;
-
-                // пересечение уже точно есть
-                F = true;
-            }
-        }
-    }
-    return F;
+    return tree.traverse(p, v, nearest_intersection, object);
 }
 
 bool Render::is_reachable(Point3D A, Point3D B)

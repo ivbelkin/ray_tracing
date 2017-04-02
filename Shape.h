@@ -24,6 +24,10 @@ public:
     // Единичная внешняя нормаль к объекту в указанной точке
     virtual Point3D get_normal(Point3D &point) const = 0;
 
+    // ограничивающий параллелепипед минимального объема
+    // точка A - имеет наименьшие координаты, B - наибольшие
+    virtual void limiting_box(Point3D *A, Point3D *B) const = 0;
+
     // Отраженный в точке point луч с направлением v
     Point3D reflected_ray(Point3D v, Point3D point) const;
 
@@ -38,6 +42,9 @@ public:
 
     // Установить материал, старая структура не удаляется
     void reset_material(const Material *_material);
+
+protected:
+    const ld eps = 1e-3;
 
 private:
     // данные о материале и модели отражения

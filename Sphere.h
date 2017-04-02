@@ -24,6 +24,10 @@ public:
     // Единичная внешняя нормаль к сфере в указанной точке
     Point3D get_normal(Point3D &point) const;
 
+    // ограничивающий параллелепипед минимального объема
+    // точка A - имеет наименьшие координаты, B - наибольшие
+    void limiting_box(Point3D *A, Point3D *B) const;
+
 private:
     // центр сферы
     Point3D center;

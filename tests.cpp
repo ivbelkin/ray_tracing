@@ -219,7 +219,7 @@ void test7()
 {
     Scene sc;
 
-    Light l({0, 0, 30}, 800);
+    Light l({20, 10, 30}, 500);
 
     ObjLoader loader;
     loader.load("model3.obj", &sc);
@@ -229,12 +229,12 @@ void test7()
 
     sc.add_light(&l);
 
-    rt::Window win(300, 300);
+    rt::Window win(600, 600);
 
     Render render;
-    render.set_window(&win, {-2, 12, 35}, {-2, 8, 35}, {2, 12, 35});
+    render.set_window(&win, {-1, 12, 25}, {-1, 8, 25}, {3, 12, 25});
     render.set_scene(&sc);
-    render.set_viewpoint({0, 10, 40});
+    render.set_viewpoint({1, 10, 30});
 
     render.draw();
 

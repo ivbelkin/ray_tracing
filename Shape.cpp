@@ -11,8 +11,8 @@ Shape::Shape()
 
 Shape::Shape(Color color)
 {
-    material = new Material(color, color, {0, 0, 0},
-                            Color(255, 255, 255), 0.8l, 70l, 0.0l, 2);
+    material = new Material(color, color, color,
+                            Color(255, 255, 255), 0.8l, 70l, 0.0l, 1);
 }
 
 const Material* Shape:: get_material() const
