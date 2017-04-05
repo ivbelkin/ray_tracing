@@ -12,6 +12,7 @@
 #include "Scene.h"
 #include "Window.h"
 #include "ObjLoader.h"
+#include "Camera.h"
 
 #include <iostream>
 
@@ -24,6 +25,7 @@ void test_all()
     test5();
     test6();
     test7();
+    test8();
 }
 
 void test1()
@@ -222,7 +224,7 @@ void test7()
     Light l({20, 10, 30}, 500);
 
     ObjLoader loader;
-    loader.load("model3.obj", &sc);
+    loader.load("model3.obj", &sc); // человек
 
     sc.backgroud = Color(10, 10, 10);
     sc.backlight = Color(0, 0, 0);
@@ -232,9 +234,44 @@ void test7()
     rt::Window win(600, 600);
 
     Render render;
-    render.set_window(&win, {-1, 12, 25}, {-1, 8, 25}, {3, 12, 25});
+
+    render.set_window(&win);
+
+    Camera camera({1, 10, 30}, {0, 0, -1}, {0, 1, 0}, 5, 4, 4);
+
     render.set_scene(&sc);
-    render.set_viewpoint({1, 10, 30});
+    render.set_camera(camera);
+
+    render.draw();
+
+    win.show();
+}
+
+void test8()
+{
+    Scene sc;
+
+    Light l({30000, 5000, 30000}, 700000000);
+
+    Triangle t1({10, 0, -5}, {10, 0, 5}, {10, 10, 0}, Color(100, 100, 100), {1, 0, 0});
+
+    ObjLoader loader;
+    loader.load("BMW_M3_GTR.obj", &sc); // гном
+
+    sc.backgroud = Color(10, 10, 10);
+    sc.backlight = Color(0, 0, 0);
+
+    sc.add_light(&l);
+
+    //sc.add_shape(&t1);
+
+    rt::Window win(1000, 500);
+    Camera cam({30000, 5000, 30000}, {1000, 3000, 0}, {0, 1, 0}, 12, 5, 2.5);
+
+    Render render;
+    render.set_window(&win);
+    render.set_scene(&sc);
+    render.set_camera(cam);
 
     render.draw();
 

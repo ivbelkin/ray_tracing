@@ -11,8 +11,10 @@ class TraversalTree {
 public:
     TraversalTree();
 
+    // построить дерево по списку объектов
     void build_from_shapes(const std::vector<Shape*> &_shapes);
 
+    // наити ближайшее пересечение луча с объектом
     bool traverse(Point3D p, Point3D v, Point3D *nearest_intersection, Shape **object);
 
 private:
@@ -70,6 +72,9 @@ private:
 
     // задает границы узла в соответствии со списком его примитивов
     void set_limiting_box(Node *node);
+
+    // упорядочивает узлы по расстоянию до точки p
+    void sort_nodes(Point3D p, Node* &first, Node* &second);
 };
 
 struct TraversalTree::Node {

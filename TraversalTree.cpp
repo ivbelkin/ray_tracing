@@ -24,7 +24,7 @@ void TraversalTree::build_from_shapes(const std::vector<Shape*> &shapes)
 
     // устанавливаем ограничивающий объем корневого узла
     set_limiting_box(root);
-    
+
     // начинаем построение с корня
     build_node(root, BY_X);
 }
@@ -54,36 +54,42 @@ bool TraversalTree::traverse_routine(TraversalTree::Node *node, Point3D p, Point
     } else {
         // иначе опускаемся ниже по дереву рекурсивно
 
-        // данные о пересечении в левом поддереве
-        Point3D left_int;
-        Shape *left_obj;
-        bool in_left = traverse_routine(node->left, p, v, &left_int, &left_obj);
+        Node *near = node->left;
+        Node *far = node->right;
 
-        // данные о пересечении в правом поддереве
-        Point3D right_int;
-        Shape *right_obj;
-        bool in_right = traverse_routine(node->right, p, v, &right_int, &right_obj);
+        sort_nodes(p, near, far);
 
-        // выбираем из них ближайшее
-        if (in_left && in_right) {
+        Point3D near_int;
+        Shape *near_obj;
+        bool in_near = traverse_routine(near, p, v, &near_int, &near_obj);
+
+        Point3D far_int;
+        Shape *far_obj;
+        bool in_far = false;
+
+        if(!in_near || !in_box(near_int, near->A, near->B)) {
+            in_far = traverse_routine(far, p, v, &far_int, &far_obj);
+        }
+
+        if (in_near && in_far) {
             // если пересечение в обоих узлах, то выбираем из них ближайшее
-            if (isLessThan((p - left_int).len2(), (p - right_int).len2())) {
-                *nearest_intersection = left_int;
-                *object = left_obj;
+            if (isLessThan((p - near_int).len2(), (p - far_int).len2())) {
+                *nearest_intersection = near_int;
+                *object = near_obj;
             } else {
-                *nearest_intersection = right_int;
-                *object = right_obj;
+                *nearest_intersection = far_int;
+                *object = far_obj;
             }
             return true;
-        } else if (in_left) {
+        } else if (in_near) {
             // если только в левом
-            *nearest_intersection = left_int;
-            *object = left_obj;
+            *nearest_intersection = near_int;
+            *object = near_obj;
             return true;
-        } else if (in_right) {
+        } else if (in_far) {
             // иначе только в правом
-            *nearest_intersection = right_int;
-            *object = right_obj;
+            *nearest_intersection = far_int;
+            *object = far_obj;
             return true;
         } else {
             return false;
@@ -205,22 +211,31 @@ void TraversalTree::build_event_array(TraversalTree::Node *node, std::vector<Eve
 bool TraversalTree::best_split(const std::vector<Event> &events, ld xmin, ld xmax, ld *xbest)
 {
     // количество примитивов слева и справа от сканирующей прямой
-    int left = 0;
-    int right = events.size() / 2;
+    ld left = 0;
+    ld right = events.size() / 2;
+
+    ld total = right;
 
     // флаг предпоследнего события начала
     bool prev_beg = false;
 
     // свободный член в оптимизируемой функции
     // отражает стоимость спуска на один уровень ниже в дереве
-    const ld bias = 10;
+    const ld bias = 0.01;
 
     // количество примитивов, дальше которого можно не разбивать
-    const int min_child = 8;
+    const ld min_child = 8;
+
+    const ld alpha = 6;
+
+    const ld beta = 0.8;
 
     // текущая стоимость прослеживания в разбиваемом узле,
     // если не производить его разбиение
-    ld curr_cost = (right - min_child) * (xmax - xmin);
+    ld curr_cost = 0;
+    if(right > min_child) {
+        curr_cost = 1;
+    }
 
     // текущий минимум и координата, на которой он достигается
     ld min = 1e50;
@@ -242,7 +257,17 @@ bool TraversalTree::best_split(const std::vector<Event> &events, ld xmin, ld xma
         if(!areEqual(xprev, e.x) && // все события с одной координатой обрабатываем вместе
            isLessEqual(xmin, e.x) && isLessEqual(e.x, xmax)) // оптимизируем на отрезке
         {
-            ld val = bias + left * (e.x - xmin) + right * (xmax - e.x);
+            ld left_cost = 0;
+            if(left > min_child) {
+                left_cost = powl(left / total, beta) * powl((e.x - xmin) / (xmax - xmin), alpha);
+            }
+
+            ld right_cost = 0;
+            if(right > min_child) {
+                right_cost = powl(right / total, beta) * powl((xmax - e.x) / (xmax - xmin), alpha);
+            }
+
+            ld val = bias + left_cost + right_cost;
             if(isMoreThan(min, val)) {
                 min = val;
                 *xbest = e.x;
@@ -347,5 +372,14 @@ void TraversalTree::set_limiting_box(TraversalTree::Node *node)
         node->B.x = std::max(node->B.x, B.x);
         node->B.y = std::max(node->B.y, B.y);
         node->B.z = std::max(node->B.z, B.z);
+    }
+}
+
+void TraversalTree::sort_nodes(Point3D p, TraversalTree::Node* &first, TraversalTree::Node* &second)
+{
+    ld first_dist = point_box_dist(p, first->A, first->B);
+    ld second_dist = point_box_dist(p, second->A, second->B);
+    if(first_dist > second_dist) {
+        std::swap(first, second);
     }
 }

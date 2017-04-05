@@ -9,6 +9,7 @@
 #include "Window.h"
 #include "geometry.h"
 #include "TraversalTree.h"
+#include "Camera.h"
 
 
 class Render {
@@ -17,6 +18,10 @@ public:
 
     void set_window(rt::Window * _window, Point3D _topleft,
                     Point3D _buttomleft, Point3D _topright);
+
+    void set_window(rt::Window * _window);
+
+    void set_camera(Camera &camera);
 
     void set_scene(Scene * _scene);
 

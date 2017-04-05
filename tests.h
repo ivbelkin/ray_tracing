@@ -32,4 +32,7 @@ void test6();
 // считывание моделей из obj фаила
 void test7();
 
+// гном
+void test8();
+
 #endif //RAY_TRACING_TESTS_H

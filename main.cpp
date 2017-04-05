@@ -1,13 +1,16 @@
 #include <iostream>
-#include <regex>
 #include <string>
 #include <cctype>
 
 #include "tests.h"
 
+#include <algorithm>
+
+#include <array>
+
 int main()
 {
-    test_all();
+    test8();
 
     return 0;
 }

@@ -208,3 +208,16 @@ Color Render::scan_lights(Point3D point, Point3D view_vector, Shape *obj)
     }
     return color;
 }
+
+void Render::set_window(rt::Window *_window)
+{
+    window = _window;
+}
+
+void Render::set_camera(Camera &camera)
+{
+    viewpoint = camera.get_viewpoint();
+    topleft = camera.get_topleft();
+    topright = camera.get_topright();
+    buttomleft = camera.get_bottomleft();
+}
