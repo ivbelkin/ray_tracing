@@ -34,21 +34,24 @@ public:
     // Преломленный при проходе через поверхность объекта луч
     Point3D refracted_ray(Point3D v, Point3D point) const;
 
-    // Получить структуру, описывающую своиства материала и модель отражения
-    const Material* get_material() const;
+    // Получить структуру, описывающую своиства материала в точке
+    virtual const Material* get_material(Point3D p) const;
 
     // Установить материал, старая структура удаляется
-    void set_material(const Material *_material);
+    // void set_material(const Material *_material);
 
     // Установить материал, старая структура не удаляется
-    void reset_material(const Material *_material);
+    // void reset_material(const Material *_material);
+
+    // получить установленную модель отражения
+    int get_illum();
 
 protected:
-    const ld eps = 1e-3;
+    const ld eps = 1e-3; // TODO
 
 private:
     // данные о материале и модели отражения
-    const Material *material;
+    Appearance *appearance;
 };
 
 #endif //RAY_TRACING_SHAPE_H

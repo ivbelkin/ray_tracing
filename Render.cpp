@@ -101,13 +101,14 @@ Color Render::get_color_point(Point3D p, Point3D v, int d)
     // проверяем существование пересечения
     if(ray_trace(p, v, &intersection, &object)) {
         // данные о материале объекта
-        const Material *obj_mat = object->get_material();
+        const Material *obj_mat = object->get_material(intersection);
+        int illum = object->get_illum();
 
         // итоговый цвет
         Color color(0, 0, 0);
 
         // вычисляем цвет в зависимости от установленной модели отражения
-        if(obj_mat->illum == 0) {
+        if(illum == 0) {
             // цвет ни от чего не зависит
             color = obj_mat->Kd;
         } else {
@@ -117,14 +118,11 @@ Color Render::get_color_point(Point3D p, Point3D v, int d)
             // единичный вектор в точку наблюдения
             Point3D view_vector = -1.0 * v.unit();
 
-            // нормаль в точке
-            // Point3D normal = object->get_normal(intersection);
-
             // считаем составляющую от первичных источников
             color = color + scan_lights(intersection, view_vector, object);
 
             // считаем составляющие от вторичных источников
-            if(obj_mat->illum > 2) {
+            if(illum > 2) {
                 // отраженный луч наблюдения
                 Point3D reflected = object->reflected_ray(v, intersection);
 
@@ -134,7 +132,7 @@ Color Render::get_color_point(Point3D p, Point3D v, int d)
             }
 
             // считаем составляющие от преломления
-            if(obj_mat->illum == 6) {
+            if(illum == 6) {
                 // преломленный луч наблюдения
                 Point3D refracted = object->refracted_ray(v, intersection);
 
@@ -171,7 +169,8 @@ bool Render::is_reachable(Point3D A, Point3D B)
 Color Render::scan_lights(Point3D point, Point3D view_vector, Shape *obj)
 {
     // материал объекта
-    const Material *mt = obj->get_material();
+    const Material *mt = obj->get_material(point);
+    int illum = obj->get_illum();
 
     // нормаль в точке
     Point3D normal = obj->get_normal(point);
@@ -195,7 +194,7 @@ Color Render::scan_lights(Point3D point, Point3D view_vector, Shape *obj)
                 color = color + (mt->Kd ^ inten) * (normal ^ light_vector);
 
                 // вклад за счет прямого отражения
-                if(mt->illum >= 2) {
+                if(illum >= 2) {
                     // направляющий вектор отраженного луча
                     Point3D reflected = obj->reflected_ray(-1.0 * light_vector, point);
 

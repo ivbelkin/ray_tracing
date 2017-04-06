@@ -6,32 +6,34 @@
 
 Shape::Shape()
 {
-    material = nullptr;
+    appearance = nullptr;
 }
 
 Shape::Shape(Color color)
 {
-    material = new Material(color, color, color,
-                            Color(255, 255, 255), 0.8l, 70l, 0.0l, 1);
+    appearance = new Appearance;
+    appearance->base = new Material(color, color, color, Color(255, 255, 255), 70l, 0.0l);
+    appearance->Ni = 1.0;
+    appearance->illum = 1;
 }
 
-const Material* Shape:: get_material() const
+const Material* Shape:: get_material(Point3D p) const
 {
-    return material;
+    return appearance->base;
 }
 
-void Shape::set_material(const Material *_material)
-{
-    if(material != nullptr) {
-        delete material;
-    }
-    material = _material;
-}
-
-void Shape::reset_material(const Material *_material)
-{
-    material = _material;
-}
+//void Shape::set_material(const Material *_material)
+//{
+//    if(material != nullptr) {
+//        delete material;
+//    }
+//    material = _material;
+//}
+//
+//void Shape::reset_material(const Material *_material)
+//{
+//    material = _material;
+//}
 
 Point3D Shape::reflected_ray(Point3D v, Point3D point) const
 {
@@ -57,10 +59,10 @@ Point3D Shape::refracted_ray(Point3D v, Point3D point) const
     if(isZero(v ^ n) || areCollinear(v, n)) {
         return v;
     } else if(sign(v ^ n) < 0) {
-        beta = asinl((n * v).len() * get_material()->Ni);
+        beta = asinl((n * v).len() * appearance->Ni);
         e1 = -1.0 * n;
     } else {
-        beta = asinl((n * v).len() / get_material()->Ni);
+        beta = asinl((n * v).len() / appearance->Ni);
         e1 = n;
     }
 
@@ -72,4 +74,9 @@ Point3D Shape::refracted_ray(Point3D v, Point3D point) const
     e2 = (-1.0 * e1 + v / (v ^ e1)).unit();
 
     return e1 * cosl(beta) + e2 * sinl(beta);
+}
+
+int Shape::get_illum()
+{
+    return appearance->illum;
 }

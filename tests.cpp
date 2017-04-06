@@ -25,7 +25,6 @@ void test_all()
     test5();
     test6();
     test7();
-    test8();
 }
 
 void test1()
