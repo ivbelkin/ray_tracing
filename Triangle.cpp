@@ -88,4 +88,52 @@ void Triangle::limiting_box(Point3D *p1, Point3D *p2) const
     *p2 = *p2 + Point3D{eps, eps, eps};
 }
 
+Triangle::Triangle(Point3D _A, Point3D _B, Point3D _C, Point2D _a, Point2D _b, Point2D _c, Point3D _n) :
+    Triangle(_A, _B, _C, _n)
+{
+    a = _a;
+    b = _b;
+    c = _c;
+}
+
+Material Triangle::get_material(Point3D p) const
+{
+    if(appearance->map_Kd == nullptr) {
+        return *appearance->base;
+    } else {
+        ld w = appearance->map_Kd->w;
+        ld h = appearance->map_Kd->h;
+
+        ld a11 = (B - A) ^ (B - A);
+        ld a12 = (C - A) ^ (B - A);
+        ld a21 = a12;
+        ld a22 = (C - A) ^ (C - A);
+        ld delta = a11 * a22 - a12 * a21;
+
+        ld alpha = ((p - A) ^ (B - A)) * a22 - a12 * ((p - A) ^ (C - A));
+        alpha /= delta;
+
+        ld beta = a11 * ((p - A) ^ (C - A)) - ((p - A) ^ (B - A)) * a21;
+        beta /= delta;
+
+        Point2D pp = a + alpha * (b - a) + beta * (c - a);
+        int x = pp.x * w;
+        int y = pp.y * h;
+
+        auto sfr = appearance->map_Kd;
+
+        Uint8 r, g, b;
+        SDL_GetRGB(*(Uint32*)((uint8_t*)sfr->pixels + y * sfr->pitch + 3 * x),
+                   sfr->format,
+                   &r, &g, &b);
+
+        Color Kd(r, g, b);
+
+        Material mat = *appearance->base;
+        mat.Kd = Kd;
+
+        return mat;
+    }
+}
+
 

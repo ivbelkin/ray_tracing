@@ -5,7 +5,7 @@
 #include "tests.h"
 #include "geometry.h"
 #include "Render.h"
-#include "Additional.h"
+#include "Color.h"
 #include "Triangle.h"
 #include "Sphere.h"
 #include "Light.h"
@@ -236,7 +236,7 @@ void test7()
 
     render.set_window(&win);
 
-    Camera camera({1, 10, 30}, {0, 0, -1}, {0, 1, 0}, 5, 4, 4);
+    Camera camera({1, 10, 30}, {0, 10, 0}, {0, 1, 0}, 5, 4, 4);
 
     render.set_scene(&sc);
     render.set_camera(camera);
@@ -266,6 +266,94 @@ void test8()
 
     rt::Window win(1000, 500);
     Camera cam({30000, 5000, 30000}, {1000, 3000, 0}, {0, 1, 0}, 12, 5, 2.5);
+
+    Render render;
+    render.set_window(&win);
+    render.set_scene(&sc);
+    render.set_camera(cam);
+
+    render.draw();
+
+    win.show();
+}
+
+void test9()
+{
+    Scene sc;
+
+    Light l({2, 0, 2}, 10);
+
+    ObjLoader loader;
+    loader.load("model4.obj", &sc); // гном
+
+    sc.backgroud = Color(10, 10, 10);
+    sc.backlight = Color(0, 0, 0);
+
+    sc.add_light(&l);
+
+
+    rt::Window win(600, 600);
+    Camera cam({5, 0.5, 0.5}, {0, 0.5, 0.5}, {0, 0, 1}, 3.99, 2, 2);
+
+    Render render;
+    render.set_window(&win);
+    render.set_scene(&sc);
+    render.set_camera(cam);
+
+    render.draw();
+
+    win.show();
+}
+
+void test10()
+{
+    Scene sc;
+
+    Point3D p{60, 20, -40};
+
+    Light l(p, 100000);
+
+    ObjLoader loader;
+    loader.load("model2.obj", &sc); // гном
+
+    sc.backgroud = Color(10, 10, 10);
+    sc.backlight = Color(0, 0, 0);
+
+    sc.add_light(&l);
+
+
+    rt::Window win(600, 600);
+    Camera cam(p, {0, 10, 0}, {0, 1, 0}, 2, 2, 2);
+
+    Render render;
+    render.set_window(&win);
+    render.set_scene(&sc);
+    render.set_camera(cam);
+
+    render.draw();
+
+    win.show();
+}
+
+void test11()
+{
+    Scene sc;
+
+    Point3D p{60, 20, -40};
+
+    Light l(p, 100000);
+
+    ObjLoader loader;
+    loader.load("model2.obj", &sc); // гном
+
+    sc.backgroud = Color(10, 10, 10);
+    sc.backlight = Color(0, 0, 0);
+
+    sc.add_light(&l);
+
+
+    rt::Window win(600, 600);
+    Camera cam(p, {0, 10, 0}, {0, 1, 0}, 2, 2, 2);
 
     Render render;
     render.set_window(&win);

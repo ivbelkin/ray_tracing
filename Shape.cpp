@@ -15,25 +15,18 @@ Shape::Shape(Color color)
     appearance->base = new Material(color, color, color, Color(255, 255, 255), 70l, 0.0l);
     appearance->Ni = 1.0;
     appearance->illum = 1;
+    appearance->map_Kd = nullptr;
 }
 
-const Material* Shape:: get_material(Point3D p) const
+Material Shape:: get_material(Point3D p) const
 {
-    return appearance->base;
+    return *appearance->base;
 }
 
-//void Shape::set_material(const Material *_material)
-//{
-//    if(material != nullptr) {
-//        delete material;
-//    }
-//    material = _material;
-//}
-//
-//void Shape::reset_material(const Material *_material)
-//{
-//    material = _material;
-//}
+void Shape::reset_material(Appearance *_appearance)
+{
+    appearance = _appearance;
+}
 
 Point3D Shape::reflected_ray(Point3D v, Point3D point) const
 {

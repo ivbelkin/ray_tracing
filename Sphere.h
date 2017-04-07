@@ -6,7 +6,7 @@
 #define RAY_TRACING_SPHERE_H
 
 #include "Shape.h"
-#include "Additional.h"
+#include "Color.h"
 #include "geometry.h"
 
 // Пространственная сфера

@@ -6,7 +6,7 @@
 #define RAY_TRACING_TRIANGLE_H
 
 #include "Shape.h"
-#include "Additional.h"
+#include "Color.h"
 
 #include "geometry.h"
 
@@ -17,6 +17,9 @@ class Triangle : public Shape {
 public:
     // Треугольник по трем точкам и нормали
     Triangle(Point3D _A, Point3D _B, Point3D _C, Point3D _n = {0, 0, 0});
+
+    // Треугольник по трем точкам, текстурным координатам и нормали
+    Triangle(Point3D _A, Point3D _B, Point3D _C, Point2D _a, Point2D _b, Point2D _c, Point3D _n = {0, 0, 0});
 
     // Треугольник по трем точкам, цвету и внешней нормали
     Triangle(Point3D _A, Point3D _B, Point3D _C,
@@ -32,6 +35,9 @@ public:
     // точка p1 - имеет наименьшие координаты, p2 - наибольшие
     void limiting_box(Point3D *p1, Point3D *p2) const;
 
+    // Получить структуру, описывающую своиства материала в точке
+    Material get_material(Point3D p) const;
+
 private:
     // Вершины треугольника
     Point3D A;
@@ -40,6 +46,11 @@ private:
 
     // Единичная внешняя нормаль
     Point3D n;
+
+    // Текстурные координаты
+    Point2D a;
+    Point2D b;
+    Point2D c;
 
     void set_normal(Point3D _n);
 

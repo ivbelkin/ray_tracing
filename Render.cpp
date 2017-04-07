@@ -12,7 +12,8 @@
 const ld eps = 1e-3;
 
 Render::Render() :
-    depth(2)
+    depth(2),
+    rays_number(1)
 {
     window = nullptr;
     scene = nullptr;
@@ -41,8 +42,13 @@ void Render::set_depth(int d)
 {
     if(d >= 0 && d <= 10) {
         depth = d;
-    } else {
-        depth = 0;
+    }
+}
+
+void Render::set_rays_number(int rn)
+{
+    if(rn >= 1 && rn <= 10) {
+        rays_number = rn;
     }
 }
 
@@ -86,7 +92,26 @@ Color Render::get_color_xy(int x, int y)
     // через текущюю точку экрана, а также его длина
     Point3D xy = to_point(x, y);
 
-    return get_color_point(xy, xy - viewpoint, depth);
+    // базис п пространстве экрана
+    Point3D i = (topright - topleft).unit();
+    Point3D j = (buttomleft - topleft).unit();
+
+    // размеры пикселя
+    ld px_width = (topright - topleft).len() / window->get_width();
+    ld px_height = (buttomleft - topleft).len() / window->get_height();
+
+    // результирующий цвет
+    Color color;
+
+    for(int y = 0; y < rays_number; ++y) {
+        for(int x = 0; x < rays_number; ++x) {
+            Point3D p = xy + i * px_width * (x + 1) / (rays_number + 1)
+                           + j * px_height * (y + 1) / (rays_number + 1);
+            color = color + get_color_point(p, p - viewpoint, depth) / (rays_number * rays_number);
+        }
+    }
+
+    return color;
 }
 
 Color Render::get_color_point(Point3D p, Point3D v, int d)
@@ -101,7 +126,7 @@ Color Render::get_color_point(Point3D p, Point3D v, int d)
     // проверяем существование пересечения
     if(ray_trace(p, v, &intersection, &object)) {
         // данные о материале объекта
-        const Material *obj_mat = object->get_material(intersection);
+        Material obj_mat = object->get_material(intersection);
         int illum = object->get_illum();
 
         // итоговый цвет
@@ -110,10 +135,10 @@ Color Render::get_color_point(Point3D p, Point3D v, int d)
         // вычисляем цвет в зависимости от установленной модели отражения
         if(illum == 0) {
             // цвет ни от чего не зависит
-            color = obj_mat->Kd;
+            color = obj_mat.Kd;
         } else {
             // фоновое освещение
-            color = obj_mat->Ka ^ scene->backlight;
+            color = obj_mat.Ka ^ scene->backlight;
 
             // единичный вектор в точку наблюдения
             Point3D view_vector = -1.0 * v.unit();
@@ -128,7 +153,7 @@ Color Render::get_color_point(Point3D p, Point3D v, int d)
 
                 // ищем рекурсивно дополнительный цвет
                 Color Ir = get_color_point(intersection + eps * reflected, reflected, d - 1);
-                color = color + (obj_mat->Ks ^ Ir);
+                color = color + (obj_mat.Ks ^ Ir);
             }
 
             // считаем составляющие от преломления
@@ -138,7 +163,7 @@ Color Render::get_color_point(Point3D p, Point3D v, int d)
 
                 // ищем рекурсивно дополнительный цвет
                 Color It = get_color_point(intersection + eps * refracted, refracted, d - 1);
-                color = color + ((1.0 - obj_mat->Ks) ^ obj_mat->Tf ^ It);
+                color = color + ((1.0 - obj_mat.Ks) ^ obj_mat.Tf ^ It);
             }
         }
         return color;
@@ -169,7 +194,7 @@ bool Render::is_reachable(Point3D A, Point3D B)
 Color Render::scan_lights(Point3D point, Point3D view_vector, Shape *obj)
 {
     // материал объекта
-    const Material *mt = obj->get_material(point);
+    Material mt = obj->get_material(point);
     int illum = obj->get_illum();
 
     // нормаль в точке
@@ -191,7 +216,7 @@ Color Render::scan_lights(Point3D point, Point3D view_vector, Shape *obj)
                 Point3D light_vector = (light->get_position() - point).unit();
 
                 // вклад за счет диффузного отражения
-                color = color + (mt->Kd ^ inten) * (normal ^ light_vector);
+                color = color + (mt.Kd ^ inten) * (normal ^ light_vector);
 
                 // вклад за счет прямого отражения
                 if(illum >= 2) {
@@ -199,8 +224,8 @@ Color Render::scan_lights(Point3D point, Point3D view_vector, Shape *obj)
                     Point3D reflected = obj->reflected_ray(-1.0 * light_vector, point);
 
                     // вклад от источника
-                    ld coef = powl((std::max(reflected.unit() ^ view_vector, 0.0l)), mt->Ns);
-                    color = color + (mt->Ks ^ inten) * coef;
+                    ld coef = powl((std::max(reflected.unit() ^ view_vector, 0.0l)), mt.Ns);
+                    color = color + (mt.Ks ^ inten) * coef;
                 }
             }
         }

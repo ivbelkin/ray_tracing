@@ -7,16 +7,18 @@
 #include <iostream>
 #include <regex>
 #include <cctype>
+#include <string>
 
 #include "Triangle.h"
 
 #include "geometry.h"
 
-void ObjLoader::load(const std::string _filename, Scene *_scene)
+#include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
+
+void ObjLoader::load(const std::string obj_filename, Scene *_scene)
 {
     scene = _scene;
-
-    obj_filename = _filename;
 
     fin.open(obj_filename);
 
@@ -24,12 +26,16 @@ void ObjLoader::load(const std::string _filename, Scene *_scene)
 
     int line_number = 0;
 
+    cur_ap = nullptr;
+
     while(fin >> cmd) {
         // пропускаем комментарии
         if(cmd[0] == '#') {
             std::getline(fin, cmd, '\n');
         } else if(cmd == "mtllib") {
-            std::getline(fin, mtl_filename, '\n');
+            std::string mtl_filename;
+            fin >> mtl_filename;
+            read_mtl(mtl_filename);
         } else if(cmd == "v") {
             read_v();
         } else if(cmd == "vt") {
@@ -42,6 +48,10 @@ void ObjLoader::load(const std::string _filename, Scene *_scene)
             read_s();
         } else if(cmd == "f") {
             read_f();
+        } else if(cmd == "usemtl") {
+            std::string name;
+            fin >> name;
+            cur_ap = scene->materials[name];
         }
         ++line_number;
     }
@@ -74,7 +84,10 @@ void ObjLoader::read_vt()
     if(fin.peek() == ' ') {
         fin >> w;
     }
-    vt.push_back({u, v, w});
+    u = std::min(u, 1.0l);
+    v = std::min(v, 1.0l);
+    w = std::min(w, 1.0l);
+    vt.push_back({u, 1.0-v});
 }
 
 void ObjLoader::read_vn()
@@ -123,7 +136,8 @@ void ObjLoader::read_f()
         parse_face_element(face, &vertex, &texture, &normal);
         Point3D n = (vn[normal - 1] + vn[pnormal - 1] + vn[cnormal - 1]);
         Triangle *t = new Triangle(v[cvertex - 1], v[pvertex - 1], v[vertex - 1],
-                                   {255, 255, 255}, n);
+                                   vt[ctexture - 1], vt[ptexture - 1], vt[texture - 1], n);
+        t->reset_material(cur_ap);
         scene->add_shape(t);
         pvertex = vertex;
         ptexture = texture;
@@ -149,4 +163,59 @@ void ObjLoader::parse_face_element(std::string s, int *vertex, int *texture, int
         s.assign(result[5].first, result[5].second);
         *normal = atoi(s.c_str());
     }
+}
+
+void ObjLoader::read_mtl(const std::string &filename)
+{
+    IMG_Init(IMG_INIT_JPG);
+    std::ifstream mtlin(filename);
+    std::string cmd;
+    cur_ap = nullptr;
+    ld r, g, b;
+    while(mtlin >> cmd) {
+        if(cmd[0] == '#') {
+            continue;
+        } else if(cmd == "newmtl"){
+            std::string name;
+            mtlin >> name;
+            auto p = scene->materials.insert(std::make_pair(name, new Appearance));
+            assert(p.second);
+            cur_ap = p.first->second;
+            cur_ap->base = new Material;
+            cur_ap->map_Kd = nullptr;
+        } else if(cmd == "Ka") {
+            mtlin >> r >> g >> b;
+            cur_ap->base->Ka = Color(r, g, b);
+        } else if(cmd == "Kd") {
+            mtlin >> r >> g >> b;
+            cur_ap->base->Kd = Color(r, g, b);
+        } else if(cmd == "Ks") {
+            mtlin >> r >> g >> b;
+            cur_ap->base->Ks = Color(r, g, b);
+        } else if(cmd == "d") {
+            mtlin >> cur_ap->base->d;
+        } else if(cmd == "Ns") {
+            mtlin >> cur_ap->base->Ns;
+        } else if(cmd == "Ni") {
+            mtlin >> cur_ap->Ni;
+        } else if(cmd == "Tf") {
+            mtlin >> r >> g >> b;
+            cur_ap->base->Tf = Color(r, g, b);
+        } else if(cmd == "illum") {
+            mtlin >> cur_ap->illum;
+        } else if(cmd == "map_Kd") {
+            std::string name;
+            mtlin >> name;
+            load_texture(name);
+        }
+    }
+}
+
+void ObjLoader::load_texture(const std::string &filename)
+{
+    SDL_Surface *sfr = IMG_Load(filename.c_str());
+    if(sfr == nullptr) {
+        std::cerr << "Error " << IMG_GetError() << std::endl;
+    }
+    cur_ap->map_Kd = sfr;
 }

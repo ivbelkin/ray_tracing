@@ -2,7 +2,7 @@
 // Created by ivb on 11.03.17.
 //
 
-#include "Additional.h"
+#include "Color.h"
 #include "Window.h"
 
 #include <iostream>

@@ -6,7 +6,7 @@
 #define RAY_TRACING_SHAPE_H
 
 #include "geometry.h"
-#include "Additional.h"
+#include "Color.h"
 #include "Material.h"
 
 class Shape {
@@ -35,23 +35,21 @@ public:
     Point3D refracted_ray(Point3D v, Point3D point) const;
 
     // Получить структуру, описывающую своиства материала в точке
-    virtual const Material* get_material(Point3D p) const;
-
-    // Установить материал, старая структура удаляется
-    // void set_material(const Material *_material);
+    virtual Material get_material(Point3D p) const;
 
     // Установить материал, старая структура не удаляется
-    // void reset_material(const Material *_material);
+    void reset_material(Appearance *_appearance);
 
     // получить установленную модель отражения
     int get_illum();
 
 protected:
     const ld eps = 1e-3; // TODO
-
-private:
     // данные о материале и модели отражения
     Appearance *appearance;
+
+private:
+
 };
 
 #endif //RAY_TRACING_SHAPE_H

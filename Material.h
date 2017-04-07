@@ -7,13 +7,22 @@
 #ifndef RAY_TRACING_MATERIAL_H
 #define RAY_TRACING_MATERIAL_H
 
-#include "Additional.h"
+#include "Color.h"
 
 #include <SDL/SDL_image.h>
 
 // материал
 // имена атрибутов соответствуют именам из фаила .mtl
 struct Material {
+    Material() :
+            Ka(0, 0, 0),
+            Kd(0, 0, 0),
+            Ks(0, 0, 0),
+            Tf(0, 0, 0),
+            Ns(1),
+            d(0)
+    {}
+
     Material(Color _Ka, Color _Kd, Color _Ks, Color _Tf, ld _Ns, ld _d) :
             Ka(_Ka),
             Kd(_Kd),

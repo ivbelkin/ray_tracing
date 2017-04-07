@@ -21,11 +21,13 @@ private:
     // сцена для сохранения модели
     Scene *scene;
 
+    Appearance *cur_ap;
+
     // .obj фаил с геометрией
-    std::string obj_filename;
+    // std::string obj_filename;
 
     // .mtl фаил с метериалами
-    std::string mtl_filename;
+    // std::string mtl_filename;
 
     // ассоциированный поток
     std::ifstream fin;
@@ -34,7 +36,7 @@ private:
     std::vector<Point3D> v;
 
     // текстурные координаты
-    std::vector<Point3D> vt;
+    std::vector<Point2D> vt;
 
     // нормали
     std::vector<Point3D> vn;
@@ -62,7 +64,10 @@ private:
                             int *texture, int *normal);
 
     // подготовить библиотеку материалов
-    void read_mtl();
+    void read_mtl(const std::string &filename);
+
+    // установить текстуру
+    void load_texture(const std::string &filename);
 };
 
 #endif //RAY_TRACING_OBJREADER_H

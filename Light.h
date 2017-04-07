@@ -5,7 +5,7 @@
 #ifndef RAY_TRACING_LIGHT_H
 #define RAY_TRACING_LIGHT_H
 
-#include "Additional.h"
+#include "Color.h"
 
 #include "geometry.h"
 
@@ -21,6 +21,10 @@ public:
 
     // Положение источника на сцене
     Point3D get_position() const;
+
+    // установка нормировочных коэффициентов
+    static void set_norm_power(ld _norm_power);
+    static void set_norm_distance(ld _norm_distance);
 
 private:
     // положение источника

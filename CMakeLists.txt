@@ -8,7 +8,7 @@ project(ray_tracing)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall")
 
 # Исходные фаилы
-set(SOURCE_EXE main.cpp Additional.h Window.cpp Camera.cpp Light.cpp ObjLoader.cpp Render.cpp Scene.cpp Shape.cpp Sphere.cpp TraversalTree.cpp Triangle.cpp tests.cpp Material.h)
+set(SOURCE_EXE main.cpp Color.h Window.cpp Camera.cpp Light.cpp ObjLoader.cpp Render.cpp Scene.cpp Shape.cpp Sphere.cpp TraversalTree.cpp Triangle.cpp tests.cpp Material.h Application.cpp Color.cpp Quadrangle.cpp)
 
 # Дополнительные директории с заголовочными файлами
 include_directories(../Geometry)

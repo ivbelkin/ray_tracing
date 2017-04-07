@@ -10,115 +10,63 @@
 
 #include <cassert>
 #include <iostream>
+#include <fstream>
 
 // Цвет
 class Color {
     friend Color operator-(ld num, Color color);
+    friend std::ifstream& operator>>(std::ifstream &in, Color &color);
 
 public:
-    Color() :
-        red_inten(0),
-        green_inten(0),
-        blue_inten(0)
-    {}
+    Color();
 
-    Color(ld _red, ld _green, ld _blue)
-    {
-        compare_and_set(&red_inten, _red);
-        compare_and_set(&green_inten, _green);
-        compare_and_set(&blue_inten, _blue);
-    }
+    // значения компонент [0, 1]
+    Color(ld _red, ld _green, ld _blue);
 
-    Color(int _red, int _green, int _blue) :
-            Color((ld)_red / 255,
-                  (ld)_green / 255,
-                  (ld)_blue / 255)
-    {}
+    // значения компонент 0..255
+    Color(int _red, int _green, int _blue);
 
-    Color operator+(Color c) const
-    {
-        return Color(red_inten + c.red_inten,
-                     green_inten + c.green_inten,
-                     blue_inten + c.blue_inten);
-    }
+    // покомпонентное сложение
+    Color operator+(Color c) const;
 
-    Color operator+(ld num) const
-    {
-        return Color(red_inten + num,
-                     green_inten + num,
-                     blue_inten + num);
-    }
+    // сложение с каждой компонентой
+    Color operator+(ld num) const;
 
-    Color operator-(ld num) const
-    {
-        return *this + (-num);
-    }
+    // вычитание из каждой компоненты
+    Color operator-(ld num) const;
 
-    Color operator*(ld num) const
-    {
-        return Color(num * red_inten,
-                     num * green_inten,
-                     num * blue_inten);
-    }
+    // умножение каждой компоненты
+    Color operator*(ld num) const;
 
-    Color operator/(ld num) const
-    {
-        return Color(red_inten / num,
-                     green_inten / num,
-                     blue_inten / num);
-    }
+    // деление каждой комоненты
+    Color operator/(ld num) const;
 
-    Color operator^(Color mask) const
-    {
-        return Color(red_inten * mask.red_inten,
-                     green_inten * mask.green_inten,
-                     blue_inten * mask.blue_inten);
-    }
+    // покомпонентное умножение
+    Color operator^(Color mask) const;
 
-    inline int red()
-    {
-        return int(red_inten * 255);
-    }
+    // интенсивность красного
+    int red();
 
-    inline int green()
-    {
-        return int(green_inten * 255);
-    }
+    // интенсивность зеленого
+    int green();
 
-    inline int blue()
-    {
-        return int(blue_inten * 255);
-    }
+    // интенсивность синего
+    int blue();
 
 private:
+    // значения интенсивностей от 0 до 1
     ld red_inten;
     ld green_inten;
     ld blue_inten;
 
-    void compare_and_set(ld *c, ld _c)
-    {
-        if(isMoreEqual(_c, 0.0)) {
-            if(isLessEqual(_c, 1.0)) {
-                *c = _c;
-            } else {
-                *c = 1.0;
-            }
-        } else {
-            *c = 0.0;
-        }
-    }
+    // проверка на допустимое значение компоненты и присваивание
+    void compare_and_set(ld *c, ld _c);
 };
 
-inline Color operator+(ld num, Color color)
-{
-    return color + num;
-}
+Color operator+(ld num, Color color);
 
-inline Color operator-(ld num, Color color)
-{
-    return Color(num - color.red_inten,
-                 num - color.green_inten,
-                 num - color.blue_inten);
-}
+Color operator-(ld num, Color color);
+
+std::ifstream& operator>>(std::ifstream &in, Color &color);
 
 #endif //RAY_TRACING_ADDITIONAL_H
