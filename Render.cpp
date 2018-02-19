@@ -216,7 +216,7 @@ Color Render::scan_lights(Point3D point, Point3D view_vector, Shape *obj)
                 Point3D light_vector = (light->get_position() - point).unit();
 
                 // вклад за счет диффузного отражения
-                color = color + (mt.Kd ^ inten) * (normal ^ light_vector);
+                color = color + (mt.Kd ^ inten) * fabsl(normal ^ light_vector);
 
                 // вклад за счет прямого отражения
                 if(illum >= 2) {
