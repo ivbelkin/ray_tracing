@@ -8,23 +8,23 @@
 #include <cassert>
 #include <cmath>
 
-Sphere::Sphere(Point3D _center, ld _radius, Color _color) :
-    center(_center),
-    color(_color)
+Sphere::Sphere(Point3D _center, ld _radius)
 {
-    assert(_radius > 0);
-    radius = _radius;
+    init(_center, _radius);
 }
 
-bool Sphere::ray_intersection(Line3D &line, Point3D *point) const
+Sphere::Sphere(Point3D _center, ld _radius, Color _color) :
+        Shape(_color)
 {
-    // напрявляющий вектор прямой
-    Point3D v = line.B - line.A;
+    init(_center, _radius);
+}
 
+bool Sphere::ray_intersection(Point3D p, Point3D v, Point3D *point) const
+{
     // коэффициенты квадратного уравнения
     ld a = v.len2();
-    ld b = -2.0 * ((center - line.A)^v);
-    ld c = ((center - line.A)^(center - line.A)) - radius * radius;
+    ld b = -2.0 * ((center - p)^v);
+    ld c = ((center - p)^(center - p)) - radius * radius;
 
     // его дискриминант
     ld D = b * b - 4 * a * c;
@@ -41,24 +41,33 @@ bool Sphere::ray_intersection(Line3D &line, Point3D *point) const
         // выберем из них корень соответствующий ближайшей
         // точке пересечения сферы с лучом
         if(alpha1 >= 0) {
-            *point = line.A + alpha1 * v;
+            *point = p + alpha1 * v;
             return true;
         } else if(alpha2 >= 0) {
-            *point = line.A + alpha2 * v;
+            *point = p + alpha2 * v;
             return true;
         } else {
             // иначе луч не пересекает сферу
-            return true;
+            return false;
         }
     }
-}
-
-Color Sphere::get_color(Point3D &point) const
-{
-    return color;
 }
 
 Point3D Sphere::get_normal(Point3D &point) const
 {
     return (point - center) / (point - center).len();
+}
+
+void Sphere::init(Point3D _center, ld _radius)
+{
+    center = _center;
+    assert(_radius > 0);
+    radius = _radius;
+}
+
+void Sphere::limiting_box(Point3D *A, Point3D *B) const
+{
+    Point3D bias{radius + eps, radius + eps, radius + eps};
+    *A = center - bias;
+    *B = center + bias;
 }

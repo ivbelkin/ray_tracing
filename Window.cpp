@@ -2,7 +2,7 @@
 // Created by ivb on 11.03.17.
 //
 
-#include "Additional.h"
+#include "Color.h"
 #include "Window.h"
 
 #include <iostream>
@@ -46,9 +46,6 @@ void rt::Window::set_pixel_at(int x, int y, Color c)
     if(x >= 0 && x < width &&
        y >= 0 && y < height)
     {
-        if(c.green() <= 1) {
-            get_height();
-        }
         image->data[4 * x + 4 * width * y + 2] = c.red();
         image->data[4 * x + 4 * width * y + 1] = c.green();
         image->data[4 * x + 4 * width * y] = c.blue();

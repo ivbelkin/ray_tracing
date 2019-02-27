@@ -2,7 +2,7 @@
 // Created by ivb on 11.03.17.
 //
 #include "Light.h"
-#include "Additional.h"
+#include "Color.h"
 
 #include "geometry.h"
 
@@ -19,15 +19,24 @@ Light::Light(Point3D _position, double _power, Color _color) :
     power = _power;
 }
 
-Color Light::get_color(Point3D point, Point3D normal) const
+Color Light::get_intensity(Point3D point) const
 {
     ld coef = norm_distance * norm_distance * power / norm_power;
-    ld cos_r_n = (ld)(normal ^ (position - point)) / (point - position).len();
 
-    return color * (coef * cos_r_n / (point - position).len2());
+    return color * (coef / (point - position).len2());
 }
 
 Point3D Light::get_position() const
 {
     return position;
+}
+
+void Light::set_norm_power(ld _norm_power)
+{
+    norm_power = _norm_power;
+}
+
+void Light::set_norm_distance(ld _norm_distance)
+{
+    norm_distance = _norm_distance;
 }

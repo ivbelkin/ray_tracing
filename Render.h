@@ -8,6 +8,8 @@
 #include "Scene.h"
 #include "Window.h"
 #include "geometry.h"
+#include "TraversalTree.h"
+#include "Camera.h"
 
 
 class Render {
@@ -17,11 +19,17 @@ public:
     void set_window(rt::Window * _window, Point3D _topleft,
                     Point3D _buttomleft, Point3D _topright);
 
+    void set_window(rt::Window * _window);
+
+    void set_camera(Camera &camera);
+
     void set_scene(Scene * _scene);
 
     void set_viewpoint(Point3D _vievpoint);
 
     void set_depth(int d);
+
+    void set_rays_number(int rn);
 
     void draw();
 
@@ -44,6 +52,14 @@ private:
     // значение по-умолчанию 0 - не искать вторичные источники
     int depth;
 
+    // расчитывать пиксель по квадрату этого числа лучей
+    // параметр antialiasing
+    int rays_number;
+
+    // KD-дерево для ускорения поиска пересечений объектов
+    // сцены с лучом
+    TraversalTree tree;
+
     // преобразует точку экрана в локальных координатах
     // в пространственную точку сцены
     Point3D to_point(int x, int y);
@@ -53,18 +69,21 @@ private:
     Color get_color_xy(int x, int y);
 
     // определяет цвет, который увидел бы наблюдатель
-    // в центре поля зрения если бы находился в точке ray.A
-    // и смотрел в направлении вектора (ray.B - ray.A)
-    Color get_color_point(Line3D ray, int d);
+    // в центре поля зрения если бы находился в точке p
+    // и смотрел в направлении вектора v
+    Color get_color_point(Point3D p, Point3D v, int d);
 
     // находит первое пересечение луча с объектом сцены, сохраняет
     // точку пересечения и указатель на объект и возвращает true,
     // если пересечения нет - возвращает false
-    bool ray_trace(Line3D ray, Point3D *nearest_intersection, Shape **obj);
+    bool ray_trace(Point3D p, Point3D v, Point3D *nearest_intersection, Shape **object);
 
-    // проверяет, достижима ли B из точки A объекта obj по прямой,
+    // проверяет, достижима ли B из точки A некоторого объекта по прямой,
     // не пересекая другие объекты
-    bool is_reachable(Shape *obj, Point3D A, Point3D B);
+    bool is_reachable(Point3D A, Point3D B);
+
+    // составляющая цвета, зависящая от первичных источников
+    Color scan_lights(Point3D point, Point3D view_vector, Shape *obj);
 };
 
 #endif //RAY_TRACING_RENDER_H

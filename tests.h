@@ -29,4 +29,15 @@ void test5();
 // сфера и источник освещения
 void test6();
 
+// считывание моделей из obj фаила
+void test7();
+
+// гном
+void test8();
+
+void test9();
+
+void test10();
+
+void test11();
 #endif //RAY_TRACING_TESTS_H

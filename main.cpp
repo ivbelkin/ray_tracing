@@ -1,9 +1,12 @@
-#include <iostream>
+#include "Application.h"
 
 #include "tests.h"
 
-int main()
+int main(int argc, char **argv)
 {
-    test_all();
+    Application app(argc, argv);
+
+    app.exec();
+
     return 0;
 }

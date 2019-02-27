@@ -5,7 +5,7 @@
 #ifndef RAY_TRACING_SCREEN_H
 #define RAY_TRACING_SCREEN_H
 
-#include "Additional.h"
+#include "Color.h"
 
 #include <vector>
 #include <X11/Xlib.h>
